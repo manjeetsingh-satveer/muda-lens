@@ -52,6 +52,13 @@
   .photo-form label { display:flex; flex-direction:column; gap:4px; color:var(--mute); font-size:12px; min-width:0; }
   .photo-form input[type=text] { background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:8px 12px; font:inherit; }
   @media (max-width:640px){ .photo-form { grid-template-columns:1fr; } }
+  [hidden] { display:none !important; }
+  button.chip { padding:5px 10px; border-radius:99px; font-size:12px; }
+  button.chip:hover, #takePhoto:hover { border-color:var(--acc); }
+  button:focus-visible { outline:2px solid var(--acc); outline-offset:2px; }
+  .cam { margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+  .cam video { width:100%; max-width:560px; border-radius:10px; border:1px solid var(--line); background:#000; }
+  #phoneLink code { color:var(--acc); user-select:all; }
   .verdict { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; }
   .verdict .kpi .v { font-size:17px; } .verdict .kpi .d { color:var(--mute); font-size:12px; margin-top:4px; }
   .conf { height:4px; border-radius:2px; background:var(--line); margin-top:8px; overflow:hidden; } .conf i { display:block; height:100%; background:var(--acc); }
@@ -101,6 +108,23 @@
       <input type="file" id="photos" accept="image/png,image/jpeg,image/webp" multiple hidden>
       <span><b>Drop photos here</b> or click to choose · PNG, JPEG or WebP</span>
     </label>
+    <div class="controls" style="margin-top:10px">
+      <button id="takePhoto">📸 Take a photo</button>
+      <input type="file" id="phoneCam" accept="image/*" capture="environment" hidden>
+      <span class="sub">or try a sample:</span>
+      <button class="chip" data-sample="scratch">Scratched die</button>
+      <button class="chip" data-sample="bond">Lifted wire bond</button>
+      <button class="chip" data-sample="wip">Overloaded WIP rack</button>
+    </div>
+    <div class="cam" id="cam" hidden>
+      <video id="camVideo" autoplay playsinline muted></video>
+      <div class="controls">
+        <button class="primary" id="snap">Capture</button>
+        <button id="camClose">Close camera</button>
+        <span class="sub" id="camMsg"></span>
+      </div>
+    </div>
+    <p class="sub" id="phoneLink" hidden></p>
     <div class="thumbs" id="thumbs"></div>
     <div class="photo-form">
       <label for="photoStep">Process step (optional)

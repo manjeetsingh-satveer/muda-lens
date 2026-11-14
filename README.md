@@ -63,6 +63,9 @@ You can use Drex hosted (Nace console) or with open weights run locally (`serve.
 
 An engineer uploads up to 8 photos from the line: a die under the microscope, wire bonds, an SPC chart screenshot, a shelf of waiting lots, or the shop-floor layout. Drex Max answers six typed questions about them in one pass: **what it shows, defect type, Lean waste, countermeasure, lot disposition, and severity**, each with a confidence value. When any answer is under 50% confident, the page asks for an engineer's review. Photos are downscaled in the browser to stay under the API's 4 MiB request limit.
 
+- **Take a photo:** uses the webcam on a laptop and the rear camera on a phone. With `npm start` running, the page shows a Wi-Fi link (e.g. `http://192.168.x.x:5173`) so a judge can open it on their phone and photograph something live.
+- **One-click samples:** a scratched die, a lifted wire bond, and an overloaded WIP rack (illustrations drawn in the browser). In our run Drex got all three right: scratch → 8D → hold, bond defect → 8D, and no defect → *waiting* → CONWIP → release.
+
 ## What else is in the dashboard
 
 - **Value stream map**: value-add vs. wait time and process cycle efficiency per step

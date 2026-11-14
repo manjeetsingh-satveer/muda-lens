@@ -13,7 +13,10 @@ const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "applic
 
 const server = http.createServer(async (req, res) => {
   if (req.method === "GET" && req.url === "/api/status") {
-    return json(res, 200, { drex: C.drex.enabled() && C.drex.label(), claude: C.claude.enabled() && C.claude.label() });
+    const lan = Object.values(require("node:os").networkInterfaces()).flat()
+      .filter(n => n && n.family === "IPv4" && !n.internal && /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(n.address))
+      .map(n => `http://${n.address}:${PORT}`);
+    return json(res, 200, { drex: C.drex.enabled() && C.drex.label(), claude: C.claude.enabled() && C.claude.label(), lan });
   }
   if (req.method === "POST" && req.url === "/api/decide") {
     let body = ""; for await (const chunk of req) { body += chunk; if (body.length > 5e6) return json(res, 413, { error: "too large" }); }

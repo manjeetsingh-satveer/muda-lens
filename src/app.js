@@ -135,6 +135,68 @@
   $("thumbs").onclick = e => { const i = e.target.dataset.i; if (i != null) { photos.splice(+i, 1); drawThumbs(); } };
   $("clearPhotos").onclick = () => { photos.length = 0; $("photoResult").innerHTML = ""; drawThumbs(); };
 
+  // --- Take a photo: phone camera via capture input; laptop webcam via getUserMedia ---
+  let stream = null;
+  const isPhone = matchMedia("(pointer: coarse)").matches;
+  const stopCam = () => { stream?.getTracks().forEach(t => t.stop()); stream = null; $("cam").hidden = true; };
+  $("phoneCam").onchange = e => { addFiles(e.target.files); e.target.value = ""; };
+  $("takePhoto").onclick = async () => {
+    if (isPhone || !navigator.mediaDevices?.getUserMedia || !isSecureContext) return $("phoneCam").click();
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1920 } }, audio: false });
+      $("camVideo").srcObject = stream; $("cam").hidden = false; $("camMsg").textContent = "Point the camera at the part, chart or shelf, then capture.";
+    } catch (e) { $("phoneCam").click(); }
+  };
+  $("snap").onclick = () => {
+    const v = $("camVideo"); if (!v.videoWidth) return;
+    const c = document.createElement("canvas"); c.width = v.videoWidth; c.height = v.videoHeight;
+    c.getContext("2d").drawImage(v, 0, 0);
+    c.toBlob(b => { addFiles([new File([b], `camera-${Date.now()}.jpg`, { type: "image/jpeg" })]); $("camMsg").textContent = "Captured. Take another or close the camera."; }, "image/jpeg", 0.9);
+  };
+  $("camClose").onclick = stopCam;
+
+  // --- Sample photos (illustrations drawn in the browser, so the demo works with no real fab photos) ---
+  const SAMPLES = {
+    scratch: { step: "DC", note: "Seen on several dies after dicing this shift", draw(g) {
+      g.fillStyle = "#23272e"; g.fillRect(0, 0, 900, 900); g.fillStyle = "#8f97a3"; g.fillRect(120, 120, 660, 660);
+      g.fillStyle = "#c3c9d2"; for (let i = 0; i < 8; i++) { g.fillRect(150 + i * 78, 140, 46, 46); g.fillRect(150 + i * 78, 714, 46, 46); }
+      g.strokeStyle = "#5d6672"; g.lineWidth = 2; for (let y = 230; y < 690; y += 22) { g.beginPath(); g.moveTo(200, y); g.lineTo(700, y); g.stroke(); }
+      g.strokeStyle = "#eef2f6"; g.lineWidth = 6; g.beginPath(); g.moveTo(160, 290); g.bezierCurveTo(350, 380, 520, 520, 770, 650); g.stroke();
+      g.strokeStyle = "#ffffff88"; g.lineWidth = 2; g.beginPath(); g.moveTo(175, 305); g.bezierCurveTo(360, 395, 525, 535, 760, 662); g.stroke();
+      g.fillStyle = "#fff"; g.font = "24px sans-serif"; g.fillText("Optical inspection 50x · die R12C07", 120, 90); } },
+    bond: { step: "WB", note: "Pull test failures rising on bonder 3 since Monday", draw(g) {
+      g.fillStyle = "#1d2127"; g.fillRect(0, 0, 900, 900); g.fillStyle = "#6c7380"; g.fillRect(260, 260, 380, 380);
+      g.fillStyle = "#d9b45a"; for (let i = 0; i < 6; i++) { g.fillRect(70, 150 + i * 110, 120, 50); g.fillRect(710, 150 + i * 110, 120, 50); }
+      g.fillStyle = "#c9ced6"; for (let i = 0; i < 6; i++) { g.fillRect(280, 180 + i * 85, 28, 28); g.fillRect(592, 180 + i * 85, 28, 28); }
+      g.strokeStyle = "#e9c46a"; g.lineWidth = 4;
+      for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(294, 194 + i * 85); g.quadraticCurveTo(220, 120 + i * 100, 130, 175 + i * 110); g.stroke();
+        if (i === 3) continue; g.beginPath(); g.moveTo(606, 194 + i * 85); g.quadraticCurveTo(680, 120 + i * 100, 770, 175 + i * 110); g.stroke(); }
+      g.beginPath(); g.moveTo(770, 505); g.quadraticCurveTo(690, 380, 650, 420); g.stroke(); // lifted bond, not attached to the die pad
+      g.strokeStyle = "#ff5c5c"; g.lineWidth = 3; g.beginPath(); g.arc(640, 450, 48, 0, 7); g.stroke();
+      g.fillStyle = "#fff"; g.font = "24px sans-serif"; g.fillText("Wire bond inspection 20x · unit 0412", 70, 80); } },
+    wip: { step: "WS", note: "Lots waiting in front of wafer probe; testers down for calibration", draw(g) {
+      g.fillStyle = "#e7e9ec"; g.fillRect(0, 0, 900, 900); g.fillStyle = "#9aa1ab";
+      for (let s = 0; s < 4; s++) g.fillRect(60, 180 + s * 170, 780, 14);
+      g.fillRect(60, 150, 14, 700); g.fillRect(826, 150, 14, 700);
+      const cols = ["#3b6fd8", "#3b6fd8", "#d8893b", "#3b6fd8"];
+      for (let s = 0; s < 4; s++) for (let i = 0; i < 9; i++) { g.fillStyle = cols[(i + s) % 4]; g.fillRect(84 + i * 84, 70 + s * 170, 70, 108); g.fillStyle = "#fff"; g.fillRect(96 + i * 84, 90 + s * 170, 46, 16); }
+      g.fillStyle = "#c0392b"; g.font = "bold 26px sans-serif"; g.fillText("HOLD: awaiting wafer probe", 230, 870);
+      g.fillStyle = "#222"; g.font = "22px sans-serif"; g.fillText("Rack B-4 · 36 lots · avg wait 31 h", 60, 40); } },
+  };
+  document.querySelectorAll("[data-sample]").forEach(b => b.onclick = async () => {
+    const s = SAMPLES[b.dataset.sample], c = document.createElement("canvas"); c.width = c.height = 900; s.draw(c.getContext("2d"));
+    const blob = await new Promise(r => c.toBlob(r, "image/png"));
+    photos.length = 0; $("photoResult").innerHTML = "";
+    await addFiles([new File([blob], `sample-${b.dataset.sample}.png`, { type: "image/png" })]);
+    $("photoStep").value = s.step; $("photoNote").value = s.note;
+  });
+
+  // --- Phone link: open the same page on a phone on this Wi-Fi to snap photos ---
+  fetch("api/status").then(r => r.json()).then(s => {
+    if (s.lan?.length && !isPhone) { $("phoneLink").hidden = false;
+      $("phoneLink").innerHTML = `📱 On a phone on the same Wi-Fi, open <code>${esc(s.lan[0])}</code> and tap “Take a photo”.`; }
+  }).catch(() => {});
+
   const NICE = s => String(s ?? "—").replace(/_/g, " ");
   $("diagnosePhotos").onclick = async () => {
     $("diagnosePhotos").disabled = true; $("photoStatus").textContent = "Drex is reading the photos…";
