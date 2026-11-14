@@ -33,8 +33,10 @@ A case counts as correct only if **all 4 decisions** are right. The same data an
 | Contender | All-4 correct | $ / 1k decisions | p50 latency |
 |---|---|---|---|
 | Rule-based SPC (no AI) | 67.1% | $0 | <1 ms |
-| **Drex (drex-max-v1.1)** | **94.3%** | **$0.16** | 272 ms |
-| Claude Opus 5.5 | run `npm run bench` | | |
+| **Drex (drex-max-v1.1)** | **94.3%** | **$0.16** | **283 ms** |
+| Claude Opus 5.5 | 92.9% | $17.18 | 2,313 ms |
+
+**Headline: Drex matches a frontier LLM on accuracy (a 1-case difference out of 70 is a tie) while being ~8× faster and ~105× cheaper.** On a line making thousands of lot decisions a day, that's the difference between $17 and $0.16 per thousand calls, and between a 2–3 s wait and an instant answer at the tool.
 
 Drex gets **30/30 quality cases** (drift, variation, defect spikes) right; the rules engine gets 11/30 because it falls for the decoys.
 
