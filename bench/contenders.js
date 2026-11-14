@@ -18,17 +18,24 @@ function drexQuestions() {
   return Object.fromEntries(Object.entries(QUESTIONS).map(([name, q]) => [name, { type: "choice", instructions: q.instructions, criteria: q.options }]));
 }
 
-async function drex(state) {
+// Low-level call. `images` (Drex Max only) = array of data:image/...;base64 URLs, max 8,
+// whole body <= 4 MiB. Refer to them in text as "Image 1", "Image 2", ...
+async function drexCall({ state, questions, images }) {
   const c = drexCfg();
   if (!c.base) throw new Error("DREX_BASE_URL not set");
-  const t0 = Date.now();
   const res = await fetch(c.base.replace(/\/$/, "") + c.path, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "X-Nace-Client": "fab-muda-lens/1", ...(c.key ? { Authorization: `Bearer ${c.key}` } : {}) },
-    body: JSON.stringify({ model: c.model, state, questions: drexQuestions() }),
+    headers: { "Content-Type": "application/json", "X-Nace-Client": "muda-lens/1", ...(c.key ? { Authorization: `Bearer ${c.key}` } : {}) },
+    body: JSON.stringify({ model: c.model, state, questions, ...(images?.length ? { images } : {}) }),
   });
   if (!res.ok) throw new Error(`Drex HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
-  const body = await res.json();
+  return res.json();
+}
+
+async function drex(state) {
+  const c = drexCfg();
+  const t0 = Date.now();
+  const body = await drexCall({ state, questions: drexQuestions() });
   const answers = body.answers || body; // tolerate providers that return answers at top level
   const out = {}, confidence = {};
   for (const name of Object.keys(QUESTIONS)) { out[name] = answers[name]?.choice; confidence[name] = answers[name]?.confidence; }
@@ -98,4 +105,4 @@ async function rules(state) {
 rules.enabled = () => true;
 rules.label = () => "Rule-based SPC (no AI)";
 
-module.exports = { drex, claude, rules, drexQuestions, claudePrompt };
+module.exports = { drex, claude, rules, drexCall, drexCfg, drexQuestions, claudePrompt };

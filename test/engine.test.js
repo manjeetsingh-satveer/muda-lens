@@ -28,3 +28,13 @@ assert.strictEqual(cs.length, 14);
 for (const c of cs) for (const q of Object.keys(QUESTIONS)) assert(c.truth[q] in QUESTIONS[q].options, `${c.id} ${q}=${c.truth[q]}`);
 assert(cs.every(c => c.decoy.step !== c.truth.culprit_step), "decoy at a different step");
 console.log("Benchmark cases OK");
+
+// photo diagnosis input checks (no network)
+const { diagnosePhoto, PHOTO_QUESTIONS } = require("../src/photo.js");
+assert(Object.keys(PHOTO_QUESTIONS).length === 6);
+(async () => {
+  await assert.rejects(diagnosePhoto({ images: [] }), /at least one photo/);
+  await assert.rejects(diagnosePhoto({ images: ["data:image/gif;base64,AAAA"] }), /PNG, JPEG or WebP/);
+  await assert.rejects(diagnosePhoto({ images: Array(9).fill("data:image/png;base64,AA") }), /up to 8/);
+  console.log("Photo checks OK");
+})();

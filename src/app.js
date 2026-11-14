@@ -1,5 +1,5 @@
 (() => {
-  const F = window.FabMuda;
+  const F = window.MudaLens;
   const $ = id => document.getElementById(id);
   const costs = { ...F.DEFAULT_COSTS };
   const charts = {};
@@ -91,6 +91,74 @@
   $("askDrex").onclick = () => decide(["drex"]);
   $("askAll").onclick = () => decide(["drex", "claude", "rules"]);
   fetch("api/status").then(r => r.json()).then(s => { $("drexStatus").textContent = s.drex ? `Connected: ${s.drex}` : "Drex not configured: set DREX_BASE_URL in .env"; }).catch(() => {});
+
+  // ---------- Photo diagnosis (Drex Max reads images) ----------
+  const photos = []; // { name, dataUrl }
+  const MAX_PHOTOS = 8, MAX_SIDE = 1600, BUDGET = 3.2e6; // request body must stay under 4 MiB
+  $("photoStep").innerHTML += F.STEPS.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
+
+  function shrink(file, side = MAX_SIDE, q = 0.85) {
+    return new Promise((ok, fail) => {
+      const img = new Image(), url = URL.createObjectURL(file);
+      img.onload = () => {
+        const k = Math.min(1, side / Math.max(img.width, img.height));
+        const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+        ok(c.toDataURL("image/jpeg", q));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); fail(new Error(`${file.name} could not be read as an image.`)); };
+      img.src = url;
+    });
+  }
+  function drawThumbs() {
+    $("thumbs").innerHTML = photos.map((p, i) => `<div class="thumb"><img src="${p.dataUrl}" alt="${esc(p.name)}"><span class="n">Image ${i + 1}</span><button data-i="${i}" aria-label="Remove ${esc(p.name)}">✕</button></div>`).join("");
+    $("diagnosePhotos").disabled = $("clearPhotos").disabled = !photos.length;
+    const total = photos.reduce((a, p) => a + p.dataUrl.length, 0);
+    $("photoStatus").textContent = photos.length ? `${photos.length} photo${photos.length > 1 ? "s" : ""} ready · ${(total / 1e6).toFixed(1)} MB` : "";
+  }
+  async function addFiles(files) {
+    const ok = [...files].filter(f => /^image\/(png|jpeg|webp)$/.test(f.type));
+    if (ok.length < files.length) $("photoStatus").textContent = "Skipped files that aren't PNG, JPEG or WebP.";
+    for (const f of ok.slice(0, MAX_PHOTOS - photos.length)) {
+      try { photos.push({ name: f.name, dataUrl: await shrink(f) }); } catch (e) { $("photoStatus").textContent = e.message; }
+    }
+    // keep the whole request under the API's body limit by shrinking further if needed
+    for (let side = 1200; photos.reduce((a, p) => a + p.dataUrl.length, 0) > BUDGET && side >= 600; side -= 200)
+      for (const p of photos) p.dataUrl = await shrink(await (await fetch(p.dataUrl)).blob(), side, 0.8);
+    drawThumbs();
+  }
+  $("photos").onchange = e => { addFiles(e.target.files); e.target.value = ""; };
+  const drop = $("drop");
+  ["dragenter", "dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", e => addFiles(e.dataTransfer.files));
+  $("thumbs").onclick = e => { const i = e.target.dataset.i; if (i != null) { photos.splice(+i, 1); drawThumbs(); } };
+  $("clearPhotos").onclick = () => { photos.length = 0; $("photoResult").innerHTML = ""; drawThumbs(); };
+
+  const NICE = s => String(s ?? "—").replace(/_/g, " ");
+  $("diagnosePhotos").onclick = async () => {
+    $("diagnosePhotos").disabled = true; $("photoStatus").textContent = "Drex is reading the photos…";
+    try {
+      const r = await fetch("api/photo", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ images: photos.map(p => p.dataUrl), step: $("photoStep").value, note: $("photoNote").value }) });
+      const o = await r.json().catch(() => ({ error: "Server returned " + r.status }));
+      if (!r.ok || o.error) throw new Error(o.error || "Server returned " + r.status);
+      const card = (label, key, extra = "") => {
+        const c = o.confidence[key], v = o.answers[key], desc = o.labels[key]?.[v];
+        return `<div class="kpi"><div class="l">${label}</div><div class="v">${esc(NICE(v))}</div>${desc ? `<div class="d">${esc(desc)}</div>` : ""}${extra}
+          ${c != null ? `<div class="conf" title="Confidence ${(c * 100).toFixed(0)}%"><i style="width:${c * 100}%"></i></div><div class="d">${(c * 100).toFixed(0)}% confident</div>` : ""}</div>`;
+      };
+      const low = Object.values(o.confidence).some(c => c != null && c < 0.5);
+      $("photoResult").innerHTML = `<div class="verdict">
+          ${card("What it shows", "subject")}${card("Defect type", "defect_type")}${card("Lean waste", "root_waste")}
+          ${card("Countermeasure", "countermeasure")}${card("Lots", "disposition")}${card("Severity", "severity")}</div>
+        <p class="sub" style="margin-top:10px">${esc(o.model)} · ${o.latencyMs} ms · ${o.inputTokens} tokens · $${o.costUsd.toFixed(6)}</p>
+        ${low ? `<p style="color:var(--warn)">⚠ Drex is unsure about at least one answer. Send these photos to an engineer for review.</p>` : ""}`;
+      $("photoStatus").textContent = "";
+    } catch (e) {
+      $("photoStatus").textContent = /fetch|Failed/.test(e.message) ? "Photo diagnosis runs on the team server: run npm start." : e.message;
+    } finally { $("diagnosePhotos").disabled = !photos.length; }
+  };
 
   // ---------- Arena (benchmark results) ----------
   fetch("bench/results.json").then(r => r.ok ? r.json() : null).then(res => {

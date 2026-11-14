@@ -1,4 +1,4 @@
-# FabMuda Lens 🦖
+# Muda Lens 🦖
 
 **Track: Apex Predator, Drex vs. the Giants.**
 In semiconductor manufacturing, a Lean Six Sigma black belt makes the same few decisions every week. We give those decisions to **Drex** and test it on cases with known answers against a frontier LLM (Claude Opus 5.5) and classic rule-based SPC.
@@ -57,6 +57,10 @@ npm test
 
 You can use Drex hosted (Nace console) or with open weights run locally (`serve.py` from `nace-ai/drex-decision-models`, then `DREX_BASE_URL=http://127.0.0.1:8000`).
 
+## Photo diagnosis (Drex Max reads images)
+
+An engineer uploads up to 8 photos from the line: a die under the microscope, wire bonds, an SPC chart screenshot, a shelf of waiting lots, or the shop-floor layout. Drex Max answers six typed questions about them in one pass: **what it shows, defect type, Lean waste, countermeasure, lot disposition, and severity**, each with a confidence value. When any answer is under 50% confident, the page asks for an engineer's review. Photos are downscaled in the browser to stay under the API's 4 MiB request limit.
+
 ## What else is in the dashboard
 
 - **Value stream map**: value-add vs. wait time and process cycle efficiency per step
@@ -72,7 +76,8 @@ You can use Drex hosted (Nace console) or with open weights run locally (`serve.
 ```
 index.html            dashboard
 src/engine.js         Lean + Six Sigma analytics (browser + Node)
-src/app.js            UI, charts, live Drex panel, arena
+src/app.js            UI, charts, live Drex panel, photo upload, arena
+src/photo.js          photo diagnosis: Drex Max image questions
 server.js             static server + /api/decide proxy (keeps keys server-side)
 bench/cases.js        ground-truth case generator + the 4 decision questions
 bench/contenders.js   Drex, Claude, and rules clients

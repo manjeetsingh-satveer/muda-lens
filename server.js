@@ -6,6 +6,7 @@ try { process.loadEnvFile?.(path.join(__dirname, ".env")); } catch {}
 const F = require("./src/engine.js");
 const { buildState } = require("./bench/cases.js");
 const C = require("./bench/contenders.js");
+const { diagnosePhoto } = require("./src/photo.js");
 
 const PORT = Number(process.env.PORT || 5173);
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".css": "text/css", ".csv": "text/csv" };
@@ -27,6 +28,11 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, out);
     } catch (e) { return json(res, 400, { error: e.message }); }
   }
+  if (req.method === "POST" && req.url === "/api/photo") {
+    let body = ""; for await (const chunk of req) { body += chunk; if (body.length > 4.2e6) return json(res, 413, { error: "Photos are too large together. Use fewer or smaller photos (about 3 MB total)." }); }
+    try { return json(res, 200, await diagnosePhoto(JSON.parse(body))); }
+    catch (e) { return json(res, 400, { error: e.message }); }
+  }
   // static files
   const rel = decodeURIComponent((req.url.split("?")[0] === "/" ? "/index.html" : req.url.split("?")[0]));
   const file = path.normalize(path.join(__dirname, rel));
@@ -37,4 +43,4 @@ const server = http.createServer(async (req, res) => {
   });
 });
 function json(res, code, obj) { res.writeHead(code, { "Content-Type": "application/json" }); res.end(JSON.stringify(obj)); }
-server.listen(PORT, () => console.log(`FabMuda Lens on http://localhost:${PORT}  (Drex: ${C.drex.enabled() ? "on" : "off"}, Claude: ${C.claude.enabled() ? "on" : "off"})`));
+server.listen(PORT, () => console.log(`Muda Lens on http://localhost:${PORT}  (Drex: ${C.drex.enabled() ? "on" : "off"}, Claude: ${C.claude.enabled() ? "on" : "off"})`));

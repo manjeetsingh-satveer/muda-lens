@@ -1,4 +1,4 @@
-// FabMuda Lens — analysis engine (pure functions, runs in browser and Node).
+// Muda Lens — analysis engine (pure functions, runs in browser and Node).
 // Lean (8 wastes / TIMWOODS) + Six Sigma (DPMO, sigma level, RTY, Cpk) for a semiconductor fab.
 
 (function (root) {
@@ -188,5 +188,5 @@
   }
 
   const api = { STEPS, WASTES, DEFAULT_COSTS, COLS, generateLots, analyze, sigmaLevel, normInv, toCSV, fromCSV };
-  if (typeof module !== "undefined" && module.exports) module.exports = api; else root.FabMuda = api;
+  if (typeof module !== "undefined" && module.exports) module.exports = api; else root.MudaLens = api;
 })(typeof window !== "undefined" ? window : globalThis);
