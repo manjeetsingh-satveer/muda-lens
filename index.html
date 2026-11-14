@@ -107,6 +107,10 @@
   @media (max-width:640px){ .photo-form { grid-template-columns:1fr; } }
   [hidden] { display:none !important; }
   .recnote { margin:10px 0 0; padding:8px 12px; border-radius:8px; background:#F2A33A14; border:1px solid #F2A33A44; color:#F5C27A; font-size:13px; }
+  .samples { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:10px; }
+  button.chip.real { display:inline-flex; align-items:center; gap:8px; padding:4px 12px 4px 4px; }
+  button.chip.real img { width:32px; height:32px; object-fit:cover; border-radius:99px; }
+  .credit { margin-left:auto; color:var(--mute); }
   button.chip { padding:5px 10px; border-radius:99px; font-size:12px; }
   button.chip:hover, #takePhoto:hover { border-color:var(--acc); }
   button:focus-visible { outline:2px solid var(--acc); outline-offset:2px; }
@@ -209,10 +213,19 @@
     <div class="controls" style="margin-top:10px">
       <button id="takePhoto">📸 Take a photo</button>
       <input type="file" id="phoneCam" accept="image/*" capture="environment" hidden>
-      <span class="sub">or try a sample:</span>
+    </div>
+    <div class="samples">
+      <span class="sub">Real photos:</span>
+      <button class="chip real" data-photo="bonded" data-src="assets/samples/wire-bonded-chip-60x.jpg"><img src="assets/samples/wire-bonded-chip-60x.jpg" alt="">Wire-bonded chip, 60×</button>
+      <button class="chip real" data-photo="die" data-src="assets/samples/die-sab1012f.jpg"><img src="assets/samples/die-sab1012f.jpg" alt="">Die in its package</button>
+      <button class="chip real" data-photo="wafers" data-src="assets/samples/silicon-wafers.jpg"><img src="assets/samples/silicon-wafers.jpg" alt="">Silicon wafers</button>
+    </div>
+    <div class="samples">
+      <span class="sub">Illustrations:</span>
       <button class="chip" data-sample="scratch">Scratched die</button>
       <button class="chip" data-sample="bond">Lifted wire bond</button>
       <button class="chip" data-sample="wip">Overloaded WIP rack</button>
+      <a class="sub credit" href="https://github.com/manjeetsingh-satveer/muda-lens/blob/main/assets/samples/CREDITS.md" target="_blank" rel="noopener">Photo credits</a>
     </div>
     <div class="cam" id="cam" hidden>
       <video id="camVideo" autoplay playsinline muted></video>

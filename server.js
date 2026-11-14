@@ -9,7 +9,7 @@ const C = require("./bench/contenders.js");
 const { diagnosePhoto } = require("./src/photo.js");
 
 const PORT = Number(process.env.PORT || 5173);
-const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".css": "text/css", ".csv": "text/csv" };
+const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".css": "text/css", ".csv": "text/csv", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".md": "text/markdown" };
 
 const server = http.createServer(async (req, res) => {
   if (req.method === "GET" && req.url === "/api/status") {

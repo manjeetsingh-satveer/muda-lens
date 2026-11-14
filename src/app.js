@@ -215,6 +215,16 @@
     if (!liveAvailable) $("photoStatus").textContent = RECORDED.photo?.[currentSample] ? "Sample loaded. Click Diagnose to replay Drex’s recorded answer." : "";
   });
 
+  // --- Real sample photos (Wikimedia Commons, see assets/samples/CREDITS.md) ---
+  document.querySelectorAll("[data-photo]").forEach(b => b.onclick = async () => {
+    const blob = await (await fetch(b.dataset.src)).blob();
+    photos.length = 0; $("photoResult").innerHTML = "";
+    await addFiles([new File([blob], b.dataset.src.split("/").pop(), { type: "image/jpeg" })]);
+    $("photoStep").value = ""; $("photoNote").value = "";
+    currentSample = "real-" + b.dataset.photo;
+    if (!liveAvailable) $("photoStatus").textContent = RECORDED.photo?.[currentSample] ? "Real photo loaded. Click Diagnose to replay Drex’s recorded answer." : "";
+  });
+
   // --- Phone link: open the same page on a phone on this Wi-Fi to snap photos ---
   fetch("api/status").then(r => r.json()).then(s => {
     if (s.lan?.length && !isPhone) { $("phoneLink").hidden = false;
