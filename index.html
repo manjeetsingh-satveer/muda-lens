@@ -228,6 +228,10 @@
   .cases-k { margin: 14px 4px 8px; color: var(--ink-soft); font-size: 0.92rem; }
   .case-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   .case.real { min-height: 0; }
+  .case[aria-pressed="true"] { border-color: var(--rust); box-shadow: inset 0 0 0 1px var(--rust); }
+  .reading { font-family: var(--serif); font-style: italic; color: var(--rust); font-size: 1.15rem; animation: pulse 1.2s ease-in-out infinite alternate; }
+  @keyframes pulse { from { opacity: .45; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .reading { animation: none; } }
   .case.real img { width: 100%; height: 84px; object-fit: cover; display: block; margin-bottom: 6px; filter: sepia(0.15); }
   .cases-k.credit { font-size: 0.8rem; margin-top: 8px; } .cases-k.credit a { color: inherit; }
   .case {

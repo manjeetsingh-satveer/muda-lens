@@ -139,7 +139,7 @@
   let currentSample = null, liveAvailable = false;
   async function addFiles(files) {
     currentSample = null;
-    document.querySelectorAll("[data-sample]").forEach(b => b.setAttribute("aria-pressed", "false"));
+    document.querySelectorAll("[data-sample],[data-photo]").forEach(b => b.setAttribute("aria-pressed", "false"));
     const ok = [...files].filter(f => /^image\/(png|jpeg|webp)$/.test(f.type));
     if (ok.length < files.length) $("photoStatus").textContent = "Skipped files that aren't PNG, JPEG or WebP.";
     for (const f of ok.slice(0, MAX_PHOTOS - photos.length)) {
@@ -150,11 +150,13 @@
       for (const p of photos) p.dataUrl = await shrink(await (await fetch(p.dataUrl)).blob(), side, 0.8);
     drawThumbs();
   }
-  $("photos").onchange = e => { addFiles(e.target.files); e.target.value = ""; };
+  // Drex reads a photo as soon as it arrives; the answer scrolls into view.
+  const readNow = () => { if (photos.length) $("diagnosePhotos").click(); };
+  $("photos").onchange = async e => { const f = [...e.target.files]; e.target.value = ""; await addFiles(f); readNow(); };
   const drop = $("drop");
   ["dragenter", "dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
   ["dragleave", "drop"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove("over"); }));
-  drop.addEventListener("drop", e => addFiles(e.dataTransfer.files));
+  drop.addEventListener("drop", async e => { await addFiles(e.dataTransfer.files); readNow(); });
   $("thumbs").onclick = e => { const i = e.target.dataset.i; if (i != null) { photos.splice(+i, 1); drawThumbs(); } };
   $("clearPhotos").onclick = () => { photos.length = 0; $("photoResult").innerHTML = ""; drawThumbs(); };
 
@@ -162,7 +164,7 @@
   let stream = null;
   const isPhone = matchMedia("(pointer: coarse)").matches;
   const stopCam = () => { stream?.getTracks().forEach(t => t.stop()); stream = null; $("cam").hidden = true; };
-  $("phoneCam").onchange = e => { addFiles(e.target.files); e.target.value = ""; };
+  $("phoneCam").onchange = async e => { const f = [...e.target.files]; e.target.value = ""; await addFiles(f); readNow(); };
   $("takePhoto").onclick = async () => {
     if (isPhone || !navigator.mediaDevices?.getUserMedia || !isSecureContext) return $("phoneCam").click();
     try {
@@ -174,7 +176,7 @@
     const v = $("camVideo"); if (!v.videoWidth) return;
     const c = document.createElement("canvas"); c.width = v.videoWidth; c.height = v.videoHeight;
     c.getContext("2d").drawImage(v, 0, 0);
-    c.toBlob(b => { addFiles([new File([b], `camera-${Date.now()}.jpg`, { type: "image/jpeg" })]); $("camMsg").textContent = "Captured. Take another or close the camera."; }, "image/jpeg", 0.9);
+    c.toBlob(async b => { await addFiles([new File([b], `camera-${Date.now()}.jpg`, { type: "image/jpeg" })]); $("camMsg").textContent = "Captured. Drex is reading it."; readNow(); }, "image/jpeg", 0.9);
   };
   $("camClose").onclick = stopCam;
 
@@ -214,7 +216,7 @@
     $("photoStep").value = s.step; $("photoNote").value = s.note;
     currentSample = b.dataset.sample; // set after addFiles, which clears it
     b.setAttribute("aria-pressed", "true");
-    if (!liveAvailable) $("photoStatus").textContent = RECORDED.photo?.[currentSample] ? "Sample loaded. Click Diagnose to replay Drex’s recorded answer." : "";
+    readNow();
   });
 
   // --- Real sample photos (Wikimedia Commons, see assets/samples/CREDITS.md) ---
@@ -224,7 +226,8 @@
     await addFiles([new File([blob], b.dataset.src.split("/").pop(), { type: "image/jpeg" })]);
     $("photoStep").value = ""; $("photoNote").value = "";
     currentSample = "real-" + b.dataset.photo;
-    if (!liveAvailable) $("photoStatus").textContent = RECORDED.photo?.[currentSample] ? "Real photo loaded. Click Diagnose to replay Drex’s recorded answer." : "";
+    b.setAttribute("aria-pressed", "true");
+    readNow();
   });
 
   // --- Phone link: open the same page on a phone on this Wi-Fi to snap photos ---
@@ -233,23 +236,30 @@
       $("phoneLink").innerHTML = `On a phone on the same Wi-Fi, open <code>${esc(s.lan[0])}</code> and tap “Take a photo”.`; }
   }).catch(() => {});
 
+  // Bring the answer into view when it's off screen (narrow windows stack it under the photo bench).
+  function showAnswer() {
+    const r = $("photoResult").getBoundingClientRect();
+    if (r.top > innerHeight - 120 || r.bottom < 0)
+      $("photoResult").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+  }
   const NICE = s => String(s ?? "—").replace(/_/g, " ");
   $("diagnosePhotos").onclick = async () => {
-    $("diagnosePhotos").disabled = true; $("photoStatus").textContent = "Drex is reading the photos…";
+    $("diagnosePhotos").disabled = true; $("photoStatus").textContent = "";
+    $("photoResult").innerHTML = `<p class="reading">Drex is reading the photo…</p>`; showAnswer();
     try {
       const r = await fetch("api/photo", { method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ images: photos.map(p => p.dataUrl), step: $("photoStep").value, note: $("photoNote").value }) });
       const o = await r.json().catch(() => ({ error: "Server returned " + r.status }));
       if (!r.ok || o.error) throw new Error(o.error || "Server returned " + r.status);
-      renderPhoto(o);
+      renderPhoto(o); showAnswer();
       $("photoStatus").textContent = "";
     } catch (e) {
       const rec = currentSample && RECORDED.photo?.[currentSample];
-      if (rec && liveFailed(e)) { renderPhoto(rec.result, recNote(rec.at)); $("photoStatus").textContent = ""; }
-      else $("photoStatus").textContent = /fetch|Failed|Server returned (404|405|501)/.test(e.message)
+      if (rec && liveFailed(e)) { renderPhoto(rec.result, recNote(rec.at)); showAnswer(); $("photoStatus").textContent = ""; }
+      else { $("photoResult").innerHTML = ""; $("photoStatus").scrollIntoView({ block: "nearest" }); $("photoStatus").textContent = /fetch|Failed|Server returned (404|405|501)/.test(e.message)
         ? (RECORDED.photo ? "This public page can’t call Drex live. Pick one of the samples to see Drex’s recorded answer, or use the team laptop for your own photos."
                           : "This public page can’t call Drex live. Live photo diagnosis runs on the team laptop.")
-        : e.message;
+        : e.message; }
     } finally { $("diagnosePhotos").disabled = !photos.length; }
   };
   function renderPhoto(o, note = "") {
