@@ -56,12 +56,12 @@
         const defects = Math.max(0, Math.round(lam + Math.sqrt(lam) * normal(r)));
         const rework = r() < Math.min(0.5, st.dpu * dpuMult * 6) ? 1 : 0;
         const holds = r() < 0.04 * queueMult ? 1 : 0;
-        const extraInspections = r() < 0.25 ? Math.max(0, st.inspect - 1) : 0; // inspections beyond control plan
-        const manualInterventions = r() < 0.08 ? 1 : 0; // operator overrides / manual recipe tweaks
+        const extraInspections = r() < Math.min(1, 0.25 * (d.inspect || 1)) ? (d.inspect ? Math.max(1, st.inspect - 1) * d.inspect : Math.max(0, st.inspect - 1)) : 0; // inspections beyond control plan
+        const manualInterventions = r() < Math.min(1, 0.08 * (d.manual || 1)) ? 1 : 0; // operator overrides / manual recipe tweaks
         const measured = st.spec.target + meanShift + st.spec.sd * sdMult * normal(r);
         rows.push({
           lot: lotId, step: st.id, va_min: +va.toFixed(1), queue_min: +queue.toFixed(1),
-          dies_in: diesPerLot, defects, rework, holds, transport_m: st.transportM * (1 + 0.2 * r()),
+          dies_in: diesPerLot, defects, rework, holds, transport_m: +(st.transportM * (d.transport || 1) * (1 + 0.2 * r())).toFixed(1),
           extra_inspections: extraInspections, manual_interventions: manualInterventions,
           measured: +measured.toFixed(4),
         });

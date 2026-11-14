@@ -71,5 +71,40 @@
   $("costs").innerHTML = Object.entries(costs).map(([k, v]) => `<label>${k}<input type="number" step="any" data-k="${k}" value="${v}"></label>`).join("");
   $("costs").oninput = e => { const k = e.target.dataset.k; if (k) { costs[k] = Number(e.target.value) || 0; run(); } };
 
+  // ---------- Drex live decisions (needs `npm start`, which proxies the API) ----------
+  const Q = ["root_waste", "culprit_step", "countermeasure", "disposition"];
+  const esc = s => String(s ?? "—").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  async function decide(contenders) {
+    $("drexStatus").textContent = "Deciding…";
+    try {
+      const r = await fetch("api/decide", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rows, contenders }) });
+      if (!r.ok) throw new Error("Server returned " + r.status + ". Start it with `npm start`.");
+      const out = await r.json();
+      $("decide").innerHTML = `<tr><th>Contender</th>${Q.map(q => `<th>${q.replace("_", " ")}</th>`).join("")}<th>Latency</th><th>Cost</th></tr>` +
+        Object.values(out).map(o => o.error ? `<tr><td>${esc(o.label)}</td><td colspan="6" style="text-align:left;color:var(--warn)">${esc(o.error)}</td></tr>` :
+          `<tr><td>${esc(o.label)}</td>${Q.map(q => `<td>${esc(o.answers[q])}${o.confidence?.[q] != null ? ` <span class="sub">${(o.confidence[q] * 100).toFixed(0)}%</span>` : ""}</td>`).join("")}
+           <td>${o.latencyMs} ms</td><td>$${o.costUsd.toFixed(6)}</td></tr>`).join("");
+      $("drexStatus").textContent = "";
+    } catch (e) { $("drexStatus").textContent = e.message.includes("fetch") ? "Live calls need the server: run `npm start`." : e.message; }
+  }
+  $("askDrex").onclick = () => decide(["drex"]);
+  $("askAll").onclick = () => decide(["drex", "claude", "rules"]);
+  fetch("api/status").then(r => r.json()).then(s => { $("drexStatus").textContent = s.drex ? `Connected: ${s.drex}` : "Drex not configured: set DREX_BASE_URL in .env"; }).catch(() => {});
+
+  // ---------- Arena (benchmark results) ----------
+  fetch("bench/results.json").then(r => r.ok ? r.json() : null).then(res => {
+    if (!res) return;
+    const cs = Object.entries(res.contenders);
+    const kinds = Object.keys(cs.find(([, c]) => c.byKind)?.[1].byKind || {});
+    $("arena").innerHTML = `<p class="sub">${res.cases} cases · generated ${new Date(res.generatedAt).toLocaleString()}</p><div class="tbl"><table>
+      <tr><th>Contender</th><th>All 4 correct</th>${Q.map(q => `<th>${q.replace("_", " ")}</th>`).join("")}<th>p50 latency</th><th>$ / 1k decisions</th></tr>
+      ${cs.map(([, c]) => c.skipped ? `<tr><td>${esc(c.label)}</td><td colspan="7" style="text-align:left" class="sub">not run (no API key configured)</td></tr>` :
+        `<tr><td><b>${esc(c.label)}</b></td><td>${pill(c.exact * 100, 85, 70, x => x.toFixed(1) + "%")}</td>${Q.map(q => `<td>${(c.perQuestion[q] * 100).toFixed(0)}%</td>`).join("")}
+         <td>${c.latencyMsP50} ms</td><td>$${c.costPer1kDecisionsUsd.toFixed(3)}</td></tr>`).join("")}
+      </table></div>
+      <div class="tbl" style="margin-top:10px"><table><tr><th>Accuracy by fault type</th>${kinds.map(k => `<th>${k.replace("_", " ")}</th>`).join("")}</tr>
+      ${cs.filter(([, c]) => !c.skipped).map(([, c]) => `<tr><td>${esc(c.label)}</td>${kinds.map(k => `<td>${c.byKind[k].exact}/${c.byKind[k].n}</td>`).join("")}</tr>`).join("")}</table></div>`;
+  }).catch(() => {});
+
   loadScenario();
 })();

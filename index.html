@@ -79,6 +79,23 @@
     <div class="card"><h2>DMAIC action plan</h2><p class="hint">Auto-generated from the data — the starting point for the team's kaizen.</p><div id="recs"></div></div>
   </section>
 
+  <section class="card" style="margin-top:16px" id="drexCard">
+    <h2>🦖 Drex decides: live call on this week's data</h2>
+    <p class="hint">Drex reads the line's data against its historical baseline and decides: which waste, which step, which countermeasure, and what to do with the lots. You can run the frontier LLM and rules on the same data for comparison.</p>
+    <div class="controls" style="margin-bottom:10px">
+      <button class="primary" id="askDrex">Ask Drex</button>
+      <button id="askAll">Drex vs. Claude vs. Rules</button>
+      <span class="sub" id="drexStatus"></span>
+    </div>
+    <div class="tbl"><table id="decide"></table></div>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>🏁 Apex Predator arena: benchmark on ground-truth cases</h2>
+    <p class="hint">Each case has one known injected fault plus a decoy problem. A contender scores only if all 4 decisions are right. Run <code>npm run bench</code> to regenerate.</p>
+    <div id="arena"><span class="sub">No results yet.</span></div>
+  </section>
+
   <section class="card" style="margin-top:16px">
     <h2>Step-level Six Sigma scorecard</h2>
     <div class="tbl"><table id="tbl"></table></div>

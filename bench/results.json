@@ -1,0 +1,1328 @@
+{
+  "generatedAt": "2026-11-14T19:44:03.073Z",
+  "cases": 70,
+  "questions": [
+    "root_waste",
+    "culprit_step",
+    "countermeasure",
+    "disposition"
+  ],
+  "contenders": {
+    "drex": {
+      "label": "Drex (drex-v2.0)",
+      "skipped": true
+    },
+    "claude": {
+      "label": "Claude (claude-opus-5-5)",
+      "skipped": true
+    },
+    "rules": {
+      "label": "Rule-based SPC (no AI)",
+      "errors": 0,
+      "exact": 0.6714285714285714,
+      "perQuestion": {
+        "root_waste": 0.6714285714285714,
+        "culprit_step": 0.6714285714285714,
+        "countermeasure": 0.6714285714285714,
+        "disposition": 0.7285714285714285
+      },
+      "byKind": {
+        "bottleneck": {
+          "n": 10,
+          "exact": 8
+        },
+        "mean_shift": {
+          "n": 10,
+          "exact": 3
+        },
+        "variance": {
+          "n": 10,
+          "exact": 1
+        },
+        "defect_spike": {
+          "n": 10,
+          "exact": 7
+        },
+        "over_inspect": {
+          "n": 10,
+          "exact": 10
+        },
+        "manual_override": {
+          "n": 10,
+          "exact": 9
+        },
+        "transport": {
+          "n": 10,
+          "exact": 9
+        }
+      },
+      "latencyMsP50": 0,
+      "latencyMsP90": 0,
+      "costPer1kDecisionsUsd": 0,
+      "avgInputTokens": 0,
+      "sampleErrors": [],
+      "runs": [
+        {
+          "id": "case-001",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-002",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "WB"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "ET"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-003",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "MT"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "FT"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-004",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "IM"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-005",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "WB"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "WB"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-006",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "IM"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "DC"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-007",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "WS"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "WS"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-008",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "FT"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "FT"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-009",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "MT"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "WS"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-010",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "MT"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "IM"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-011",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "PH"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "PH"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-012",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-013",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-014",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "DA"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "DA"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-015",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "PH"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "IM"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-016",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "MD"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-017",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "IM"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-018",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "WB"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "DA"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-019",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-020",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "DF"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "DF"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-021",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "PH"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "IM"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-022",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-023",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "FT"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-024",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "DA"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-025",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "MD"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-026",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "ET"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "ET"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-027",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-028",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "DF"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "DF"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-029",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "ET"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "ET"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-030",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "MT"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "MT"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-031",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "OX"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "DF"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-032",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "ET"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "ET"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-033",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-034",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "PH"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "PH"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-035",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "IM"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "IM"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-036",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "FT"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "FT"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-037",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "OX"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "DC"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-038",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "ET"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "IM"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-039",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "MT"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "MT"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-040",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "DF"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "DF"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-041",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-042",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "MT"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "MT"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-043",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "PH"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "ET"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-044",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "PH"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-045",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "DC"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-046",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "DF"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "IM"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-047",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "WS"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "WS"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-048",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-049",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "ET"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "ET"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-050",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "DC"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "DC"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-051",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "DA"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "FT"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-052",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "WB"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "WB"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-053",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "DF"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "DF"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-054",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "DF"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "DF"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-055",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "MT"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "MT"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-056",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-057",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "FT"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "FT"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-058",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "DC"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "DC"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-059",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "ET"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-060",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "ET"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "ET"
+          },
+          "latencyMs": 1,
+          "costUsd": 0
+        },
+        {
+          "id": "case-061",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "FT"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "FT"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-062",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "PH"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "PH"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-063",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "WB"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "WB"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-064",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "IM"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "IM"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-065",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "ET"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-066",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "DA"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "IM"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-067",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "MD"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-068",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-069",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "DF"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "DF"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        },
+        {
+          "id": "case-070",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "DC"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "DC"
+          },
+          "latencyMs": 0,
+          "costUsd": 0
+        }
+      ]
+    }
+  }
+}
