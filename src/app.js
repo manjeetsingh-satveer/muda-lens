@@ -348,6 +348,18 @@
       <p class="call-meta">${sw.drexCalls} Drex calls · ${(sw.wallMs / 1000).toFixed(1)} s · $${sw.costUsd.toFixed(4)} · ${esc(sw.model)}</p></div>${note}`;
   }
   drawSwarm(null);
+  // "Watch the swarm" jumps to the board and runs it on a week with a real fault, so there's something to see.
+  document.querySelectorAll("[data-run-swarm]").forEach(a => a.addEventListener("click", e => {
+    e.preventDefault();
+    const sel = $("scenario");
+    if (sel.value === "baseline" || sel.value === "improved") { sel.value = "backend"; sel.dispatchEvent(new Event("change")); }
+    // scroll after the charts above have re-drawn, so the board doesn't move out from under the jump
+    requestAnimationFrame(() => setTimeout(() => {
+      $("swarm").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+      history.replaceState(null, "", "#swarm");
+      if (!$("runSwarm").disabled) $("runSwarm").click();
+    }, 150));
+  }));
   $("runSwarm").onclick = async () => {
     const btn = $("runSwarm"); btn.disabled = true; $("swarmStatus").textContent = "12 station agents are asking Drex…";
     drawSwarm(null, "thinking"); $("swarmDispatch").innerHTML = "";
