@@ -3,241 +3,474 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Muda Lens</title>
+<title>Muda Lens — the pile is not the plan</title>
 <meta name="description" content="Muda Lens reads a semiconductor line, or a photo from the floor, and says which waste it is and whether the lots should ship.">
+<meta name="theme-color" content="#e7dccb">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%239c341f' stroke-width='1.6'/%3E%3Ccircle cx='16' cy='16' r='1.6' fill='%239c341f'/%3E%3Cpath d='M16 3.5v4M16 24.5v4M3.5 16h4M24.5 16h4' stroke='%239c341f' stroke-width='1.6'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560;9..144,640&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,620;1,9..144,500;1,9..144,620&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
-  /* Paper, ink, one red. Teal in the charts is still value-adding time. Amber is still waiting. */
-  :root { --bg:#e7dccb; --bg2:#efe6d6; --panel:#f7f1e6; --line:#d3c6b2; --ink:#1c1712; --mute:#5c564c; --acc:#1e3f34; --rust:#9c341f; --bad:#9c2b1a; --warn:#8a4e12; --good:#1e3f34;
-          --sans:'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; --serif:'Fraunces', 'Iowan Old Style', Georgia, serif; --mono:'JetBrains Mono', ui-monospace, Consolas, monospace; color-scheme:light; }
+  :root {
+    --desk: #e6dccb;
+    --paper: #f6f0e6;
+    --paper-2: #fffaf3;
+    --ink: #1c1712;
+    --ink-soft: #4e473f;
+    --faint: #7a7268;
+    --rule: #d5c9b6;
+    --rust: #9c341f;
+    --rust-deep: #742616;
+    --green: #1e3f34;
+    --blush: #f3e3d8;
+    --warn: #8d5a16;
+    --serif: "Fraunces", "Iowan Old Style", Palatino, Georgia, serif;
+    --sans: "IBM Plex Sans", "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", Consolas, ui-monospace, monospace;
+    color-scheme: light;
+  }
   * { box-sizing: border-box; }
-  html { scroll-behavior:smooth; scroll-padding-top:72px; }
-  @media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } .stat, .hero h1, .hero .lead { animation:none !important; } }
-  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 var(--sans); }
-  body::before { content:""; display:block; height:6px; background:var(--rust); }
-  ::selection { background:#ead3c4; color:var(--ink); }
-  a { color:var(--rust); }
-  h1, h2.sect, .bench-head h2 { font-family:var(--serif); font-weight:560; font-optical-sizing:auto; }
-  h1, h2, h3 { text-wrap:balance; }
-  .sub { color:var(--mute); font-size:13px; }
-  .eyebrow { font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--rust); margin:0 0 10px; font-weight:500; }
-  .mute { color:var(--mute); } .amber { color:var(--warn) !important; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1200px 500px at 10% -10%, rgba(255, 250, 243, 0.7), transparent 50%),
+      var(--desk);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.55;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before { content: ""; display: block; height: 7px; background: var(--rust); }
+  ::selection { background: #ead3c4; color: var(--ink); }
+  :focus-visible { outline: 2px solid var(--rust); outline-offset: 3px; }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  p { margin: 0; }
+  h1, h2, h3 { font-weight: 560; text-wrap: balance; }
+  a { color: inherit; }
+  code { font-family: var(--mono); font-size: 0.86em; }
 
-  .topnav { position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px max(16px, env(safe-area-inset-right, 0px)) 14px max(16px, env(safe-area-inset-left, 0px)); background:#f7f1e6f2; border-bottom:1px solid var(--line); }
-  .brand { display:flex; align-items:center; gap:8px; color:var(--ink); text-decoration:none; font-family:var(--serif); font-size:22px; letter-spacing:-.03em; } .brand b { font-weight:560; } .brand svg { color:var(--rust); }
-  .navlinks { display:flex; gap:14px 18px; align-items:center; flex-wrap:wrap; justify-content:flex-end; } .navlinks a { color:var(--mute); text-decoration:none; font-size:14px; white-space:nowrap; } .navlinks a:hover { color:var(--ink); }
-  .navlinks .gh { border:0; border-bottom:1px solid var(--ink); padding:0 0 1px; border-radius:0; color:var(--ink); }
-  @media (max-width:720px) {
-    .topnav { align-items:flex-start; flex-direction:column; }
-    .navlinks { justify-content:flex-start; }
+  .skip { position: absolute; left: -999px; top: 0; }
+  .skip:focus { left: 16px; top: 16px; background: var(--paper); padding: 8px 12px; z-index: 5; }
+
+  .wrap { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+
+  .mast {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    padding: 28px 0 18px;
+  }
+  .brand { display: flex; gap: 12px; align-items: center; color: inherit; text-decoration: none; }
+  .mark { width: 36px; height: 36px; color: var(--rust); flex: none; }
+  .brand strong {
+    display: block;
+    font-family: var(--serif);
+    font-size: 1.35rem;
+    font-weight: 560;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .brand em { display: block; margin-top: 4px; font-style: italic; font-size: 0.92rem; color: var(--ink-soft); }
+  .nav { display: flex; gap: 18px; flex-wrap: wrap; justify-content: flex-end; }
+  .nav a { color: var(--ink-soft); text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  .nav a:hover { color: var(--ink); }
+
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 28px;
+    padding-bottom: 8px;
+  }
+  .kicker {
+    margin: 0 0 12px;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--rust-deep);
+  }
+  h1 {
+    margin: 0;
+    max-width: 12ch;
+    font-family: var(--serif);
+    font-size: clamp(46px, 6.4vw, 78px);
+    font-weight: 560;
+    letter-spacing: -0.035em;
+    line-height: 0.94;
+  }
+  .h1b {
+    margin: 14px 0 0;
+    max-width: 16ch;
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 520;
+    font-size: clamp(28px, 3.5vw, 42px);
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    color: var(--rust);
+  }
+  .dek { max-width: 38rem; margin-top: 18px; font-size: 1.08rem; color: var(--ink-soft); }
+  .dek b { color: var(--ink); font-weight: 560; }
+
+  .stamp {
+    width: 128px;
+    height: 128px;
+    margin-top: 18px;
+    border: 1.5px solid var(--rust);
+    border-radius: 50%;
+    color: var(--rust);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transform: rotate(-8deg);
+    align-self: center;
+  }
+  .stamp span { font-family: var(--sans); font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; }
+  .stamp strong { font-family: var(--serif); font-style: italic; font-weight: 560; font-size: 1.35rem; letter-spacing: -0.03em; line-height: 1; margin: 3px 0; }
+
+  .score { grid-column: 1 / -1; padding-top: 28px; }
+  .score-kicker { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rust-deep); }
+  .score-num {
+    margin: 6px 0 8px;
+    font-family: var(--mono);
+    font-size: clamp(42px, 6vw, 72px);
+    font-weight: 500;
+    letter-spacing: -0.045em;
+    line-height: 0.95;
+  }
+  .score-sub { max-width: 40rem; font-size: 1.15rem; }
+  .figures {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 32px;
+    margin-top: 22px;
+    max-width: 44rem;
+  }
+  .figures div { border-top: 1px solid var(--ink); padding-top: 10px; }
+  .figures b { display: block; font-family: var(--mono); font-weight: 500; font-size: 1.7rem; letter-spacing: -0.04em; line-height: 1; }
+  .figures span { display: block; margin-top: 6px; color: var(--ink-soft); font-size: 0.92rem; }
+  .figures .hot b { color: var(--rust); }
+
+  .presets {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    align-items: baseline;
+    margin-top: 18px;
+    color: var(--ink-soft);
+  }
+  .presets a {
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 1px;
+  }
+  .presets a:hover { color: var(--rust); border-bottom-color: var(--rust); }
+
+  .instrument {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+    gap: 22px;
+    align-items: start;
+    padding-top: 28px;
+  }
+  .room, .reading, .sheet, .books {
+    background: var(--paper);
+    border: 1px solid rgba(28, 23, 18, 0.16);
+    box-shadow: 0 18px 40px rgba(88, 62, 32, 0.06);
+  }
+  .room {
+    padding: 14px;
+    background-color: #f3ecdf;
+    background-image:
+      linear-gradient(to right, rgba(28, 23, 18, 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(28, 23, 18, 0.045) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  .room-head, .sheet-k {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 2px 4px 12px;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+  }
+  .room-head strong, .sheet-k strong { font-family: var(--serif); font-weight: 560; color: var(--ink); }
+
+  .drop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 168px;
+    border: 1px dashed rgba(28, 23, 18, 0.4);
+    background: rgba(255, 250, 243, 0.92);
+    color: var(--ink-soft);
+    cursor: pointer;
+    text-align: center;
+    padding: 22px;
+  }
+  .drop:hover, .drop.over { border-color: var(--rust); color: var(--ink); }
+  .drop-copy { display: flex; flex-direction: column; gap: 6px; }
+  .drop-copy strong { color: var(--ink); font-family: var(--serif); font-size: 1.7rem; font-weight: 560; letter-spacing: -0.03em; }
+  .drop-copy em { font-style: italic; font-size: 0.95rem; }
+
+  .cases-k { margin: 14px 4px 8px; color: var(--ink-soft); font-size: 0.92rem; }
+  .case-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .case {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    text-align: left;
+    min-height: 112px;
+    padding: 10px;
+    background: rgba(255, 250, 243, 0.94);
+    border: 1px solid rgba(28, 23, 18, 0.28);
+  }
+  .case span { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rust-deep); }
+  .case strong { font-size: 0.98rem; font-weight: 600; letter-spacing: -0.02em; }
+  .case em { font-style: normal; color: var(--ink-soft); font-size: 0.78rem; line-height: 1.35; }
+  .case[aria-pressed="true"] { border-color: var(--rust); box-shadow: inset 0 0 0 1px var(--rust); background: var(--paper-2); }
+
+  .photo-tools { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 12px; }
+  button, select, .file {
+    background: transparent;
+    border: 1px solid rgba(28, 23, 18, 0.35);
+    border-radius: 0;
+    padding: 8px 12px;
+  }
+  button.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  button.primary:hover { background: var(--rust); border-color: var(--rust); color: var(--paper-2); }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  .file { display: inline-flex; align-items: center; color: var(--ink-soft); cursor: pointer; font-size: 0.92rem; }
+  select { background: var(--paper); }
+
+  .reading { padding: 16px 16px 18px; }
+  .photo-form { display: grid; gap: 14px; }
+  .photo-form label, .scen label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.92rem;
+    color: var(--ink);
+  }
+  .photo-form select, .photo-form input[type="text"], input[type="number"] {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--ink);
+    border-radius: 0;
+    font-family: var(--mono);
+    font-size: 1rem;
+    padding: 6px 0;
+  }
+  .photo-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+  .sub, .hint, .bench-lead { color: var(--ink-soft); }
+  .sub { font-size: 0.86rem; }
+  .bench-empty { margin: 18px 0 0; font-family: var(--serif); font-style: italic; font-size: 1.35rem; line-height: 1.25; letter-spacing: -0.02em; color: var(--ink); }
+  #photoCard:has(#photoResult:not(:empty)) .bench-empty { display: none; }
+
+  .thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .thumb { position: relative; width: 96px; height: 96px; overflow: hidden; border: 1px solid rgba(28, 23, 18, 0.28); background: var(--paper-2); }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb .n { position: absolute; left: 4px; top: 4px; background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 0.62rem; padding: 1px 5px; }
+  .thumb button { position: absolute; right: 4px; top: 4px; padding: 0 6px; line-height: 18px; background: var(--paper); border: 1px solid var(--ink); font-size: 12px; }
+
+  .cam { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .cam video { width: 100%; max-width: 560px; border: 1px solid rgba(28, 23, 18, 0.28); background: #1c1712; }
+  #phoneLink { margin-top: 8px; }
+  #phoneLink code { color: var(--rust-deep); user-select: all; }
+  [hidden] { display: none !important; }
+
+  .verdict { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; margin-top: 8px; }
+  .kpi { background: transparent; border: 0; border-top: 1px solid var(--rule); padding: 10px 0 12px; }
+  .kpi .l { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }
+  .kpi .v { margin-top: 4px; font-family: var(--serif); font-size: 1.35rem; font-weight: 560; letter-spacing: -0.03em; line-height: 1.1; text-transform: capitalize; }
+  .kpi .d { margin-top: 4px; color: var(--ink-soft); font-size: 0.86rem; }
+  .verdict .kpi:nth-child(5) .v { color: var(--rust); }
+  .conf { height: 2px; background: var(--rule); margin-top: 8px; }
+  .conf i { display: block; height: 100%; background: var(--rust); }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 22px; margin-top: 8px; }
+  .kpis .kpi .v { font-family: var(--mono); font-size: 1.35rem; font-weight: 500; letter-spacing: -0.04em; text-transform: none; }
+
+  .pill { font-family: var(--mono); font-weight: 500; background: none; padding: 0; }
+  .good { color: var(--green); }
+  .warn { color: var(--warn); }
+  .bad { color: var(--rust); }
+  .amber { color: var(--warn); }
+
+  .recnote {
+    margin: 12px 0 0;
+    padding: 2px 0 2px 12px;
+    border-left: 2px solid var(--rust);
+    background: transparent;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
   }
 
-  .hero { position:relative; overflow:hidden; border-bottom:1px solid var(--line); background:var(--bg); }
-  .hero-in, .band-in { position:relative; max-width:1200px; margin:0 auto; padding-block:64px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
-  .hero h1 { font-size:clamp(44px, 6.2vw, 80px); line-height:.96; letter-spacing:-.035em; margin:0; font-weight:560; max-width:12ch; }
-  .h1b { margin:12px 0 0; font-family:var(--serif); font-style:italic; font-weight:520; font-size:clamp(28px, 3.4vw, 42px); letter-spacing:-.03em; color:var(--rust); }
-  .lead { font-size:clamp(17px, 1.5vw, 19px); color:var(--mute); max-width:40rem; margin:18px 0 28px; } .lead b { color:var(--ink); }
-  .cta { display:flex; flex-wrap:wrap; gap:18px; align-items:center; margin-bottom:36px; }
-  .btn { display:inline-flex; align-items:center; gap:8px; padding:12px 18px; border-radius:2px; border:1px solid var(--ink); color:var(--ink); text-decoration:none; font-weight:500; background:transparent; }
-  .btn.primary { background:var(--ink); color:var(--panel); border-color:var(--ink); } .btn:hover { background:var(--rust); border-color:var(--rust); color:#fffaf3; }
-  .stats { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px; }
-  @media (max-width:760px) { .stats { grid-template-columns:1fr; } }
-  .stat { background:transparent; border:0; border-top:1px solid var(--ink); border-radius:0; padding:14px 0 0; display:flex; flex-direction:column; gap:6px; }
-  .stat:nth-child(2) { animation-delay:.1s; } .stat:nth-child(3) { animation-delay:.2s; }
-  .stat .big { font-family:var(--serif); font-size:clamp(36px, 4vw, 52px); font-weight:560; color:var(--ink); line-height:.95; letter-spacing:-.03em; }
-  .stat .lbl { font-size:14px; color:var(--ink); } .stat .lbl .mute { font-size:13px; }
-  @keyframes rise { from { opacity:.0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+  .sheet, .books { margin-top: 22px; padding: 22px 22px 24px; }
+  .section-head h2, .creed h2, .sheet > h2, .card-title {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+  .lede, .sheet > .hint, .bench-lead { max-width: 42rem; margin-top: 8px; color: var(--ink-soft); font-size: 1.02rem; }
+  .sheet h2, .books h2 { font-family: var(--serif); font-size: 1.55rem; letter-spacing: -0.03em; margin: 0 0 6px; font-weight: 560; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
+  .pair { margin-top: 22px; }
 
-  .band { background:var(--bg2); border-bottom:1px solid var(--line); }
-  h2.sect { font-size:clamp(26px, 3.2vw, 40px); line-height:1.12; letter-spacing:-.02em; margin:0 0 14px; } h2.sect em { font-style:italic; color:var(--rust); }
-  .narrow { max-width:70ch; }
-  .trio { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px; }
-  .tile { background:transparent; border:0; border-top:1px solid var(--line); border-radius:0; padding:16px 0 0; }
-  .tile .k { font-family:var(--mono); font-size:12px; color:var(--warn); letter-spacing:.08em; text-transform:uppercase; }
-  .tile h3 { margin:8px 0 6px; font-size:19px; } .tile p { margin:0; color:var(--mute); font-size:14px; }
-  .steps { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px; }
-  .step { display:flex; gap:14px; align-items:flex-start; } .step h3 { margin:2px 0 4px; font-size:17px; } .step p { margin:0; color:var(--mute); font-size:14px; }
-  .step .n { flex:0 0 auto; font-family:var(--serif); font-style:italic; font-size:28px; color:var(--rust); line-height:1; }
-  @media (max-width:860px) { .trio, .steps { grid-template-columns:1fr; } }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+  .demo-head { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: flex-end; justify-content: space-between; }
 
-  main { max-width:1200px; margin:0 auto; padding-block:40px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); display:flex; flex-direction:column; gap:16px; }
-  main > * { margin-top:0 !important; margin-bottom:0 !important; }
-  #photoCard { order:-2; padding:28px; }
-  .demo-head { order:-1; display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; justify-content:space-between; padding-top:24px; }
-  .demo-head h2.sect { margin:0; }
-  .card.proof { border-color:#F2A33A55; }
-  footer { border-top:1px solid var(--line); color:var(--mute); font-size:13px; padding:28px max(16px, env(safe-area-inset-right, 0px)) 40px max(16px, env(safe-area-inset-left, 0px)); text-align:center; }
-  footer p { margin:4px 0; } footer b { color:var(--ink); }
-  .controls { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
-  button, select, input[type=number] { background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:8px 12px; font:inherit; }
-  button { cursor:pointer; } button.primary { background:var(--ink); color:#f7f1e6; border-color:var(--ink); font-weight:500; }
-  button.primary:hover { background:var(--rust); border-color:var(--rust); }
-  label.file { border:1px dashed var(--line); padding:8px 12px; border-radius:8px; cursor:pointer; color:var(--mute); }
-  .grid { display:grid; gap:16px; }
-  .kpis { grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); margin:16px 0; }
-  .kpi { background:#f3ecdf; border:1px solid var(--line); border-radius:2px; padding:14px; }
-  .kpi .v { font-size:24px; font-weight:700; } .kpi .l { color:var(--mute); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
-  .two { grid-template-columns:1fr 1fr; } @media (max-width:900px){ .two{grid-template-columns:1fr;} }
-  .card { background:var(--panel); border:1px solid rgba(28,23,18,.16); border-radius:2px; padding:22px; min-width:0; box-shadow:0 16px 36px rgba(88,62,32,.05); }
-  .card h2 { font-family:var(--serif); font-size:22px; font-weight:560; letter-spacing:-.02em; margin:0 0 8px; } .card p.hint { color:var(--mute); margin:0 0 12px; font-size:14px; line-height:1.45; }
-  table { width:100%; border-collapse:collapse; font-size:13px; } th,td { padding:6px 8px; border-bottom:1px solid var(--line); text-align:right; white-space:nowrap; }
-  th:first-child, td:first-child { text-align:left; } th { color:var(--mute); font-weight:500; }
-  .tbl { overflow-x:auto; }
-  .pill { display:inline-block; padding:1px 8px; border-radius:99px; font-size:12px; font-weight:600; }
-  .bad{background:#e5484d22;color:var(--bad)} .warn{background:#f2a33a22;color:var(--warn)} .good{background:#46c37b22;color:var(--good)}
-  .kpi .v .pill { font-size:22px; padding:0 10px; }
-  .rec { border-left:2px solid var(--rust); padding:8px 12px; margin:8px 0; background:#f3ecdf; border-radius:0; }
-  .rec b { color:var(--rust); } .tag { font-size:11px; color:var(--mute); margin-left:6px; }
-  .vsm { display:flex; gap:4px; overflow-x:auto; padding-bottom:6px; }
-  .vsm .box { flex:1 0 92px; background:#f3ecdf; border:1px solid var(--line); border-radius:2px; padding:8px; font-size:12px; }
-  .vsm .box .n { font-weight:600; font-size:12px; margin-bottom:4px; } .bar { height:6px; border-radius:3px; background:var(--line); margin-top:4px; overflow:hidden; } .bar i { display:block; height:100%; }
-  details { margin-top:16px; } summary { cursor:pointer; color:var(--mute); }
-  .scen { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; margin-top:10px; }
-  .scen label { display:flex; justify-content:space-between; gap:8px; align-items:center; color:var(--mute); font-size:13px; }
-  .scen input { width:90px; }
-  footer { color:var(--mute); font-size:12px; padding:24px; text-align:center; }
-  .bench-head { max-width:40rem; margin-bottom:18px; }
-  .bench-head h2 { font-size:clamp(32px, 4vw, 52px); line-height:1.02; letter-spacing:-.03em; margin:0 0 10px; }
-  .bench-lead { margin:0; color:var(--mute); font-size:16px; max-width:62ch; }
-  .bench-grid { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(280px,.95fr); gap:22px; align-items:start; }
-  @media (max-width:860px) { .bench-grid { grid-template-columns:1fr; } }
-  .drop { display:flex; align-items:center; justify-content:center; min-height:168px; border:1.5px dashed #b7aa96; border-radius:2px; color:var(--mute); cursor:pointer; text-align:center; padding:22px; background:#f3ecdf; transition:border-color .15s, background .15s; }
-  .drop:hover, .drop.over { border-color:var(--rust); background:#f7f1e6; color:var(--ink); }
-  .drop:focus-within { outline:2px solid var(--rust); outline-offset:2px; }
-  .drop-copy { display:flex; flex-direction:column; gap:6px; }
-  .drop-copy strong { color:var(--ink); font-family:var(--serif); font-size:26px; font-weight:560; letter-spacing:-.02em; }
-  .drop-copy em { font-style:normal; font-size:14px; }
-  .cases-k { margin:14px 0 8px; color:var(--mute); font-size:13px; }
-  .case-row { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; }
-  @media (max-width:640px) { .case-row { grid-template-columns:1fr; } }
-  .case { display:flex; flex-direction:column; align-items:flex-start; gap:3px; text-align:left; padding:12px; border-radius:2px; background:#f3ecdf; min-height:96px; }
-  .case span { font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--rust); }
-  .case strong { font-size:15px; letter-spacing:-.01em; }
-  .case em { font-style:normal; color:var(--mute); font-size:12px; line-height:1.35; }
-  .case[aria-pressed="true"] { border-color:var(--rust); box-shadow:inset 0 0 0 1px var(--rust); background:#f7f1e6; }
-  .bench-ask { background:#f3ecdf; border:1px solid var(--line); border-radius:2px; padding:16px; }
-  .bench-empty { margin:14px 0 0; color:var(--mute); font-family:var(--serif); font-style:italic; font-size:18px; line-height:1.35; }
-  #photoCard:has(#photoResult:not(:empty)) .bench-empty { display:none; }
-  .photo-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:12px; }
-  .photo-actions .primary { padding:12px 18px; border-radius:10px; }
-  .thumbs { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
-  .thumb { position:relative; width:132px; height:132px; border-radius:12px; overflow:hidden; border:1px solid var(--line); }
-  .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
-  .thumb .n { position:absolute; left:4px; top:4px; background:#000a; color:#fff; font-size:11px; padding:1px 6px; border-radius:99px; }
-  .thumb button { position:absolute; right:4px; top:4px; padding:0 7px; font-size:12px; line-height:20px; border-radius:99px; background:#000a; border:0; }
-  .photo-form { display:grid; grid-template-columns:1fr; gap:10px; }
-  .bench-ask .photo-form { margin-top:0; }
-  .photo-form label { display:flex; flex-direction:column; gap:4px; color:var(--mute); font-size:12px; min-width:0; }
-  .photo-form input[type=text] { background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:8px 12px; font:inherit; }
-  @media (max-width:640px){ .photo-form { grid-template-columns:1fr; } }
-  [hidden] { display:none !important; }
-  .recnote { margin:10px 0 0; padding:8px 12px; border-radius:8px; background:#F2A33A14; border:1px solid #F2A33A44; color:#F5C27A; font-size:13px; }
-  button.chip { padding:5px 10px; border-radius:99px; font-size:12px; }
-  button.chip:hover, #takePhoto:hover { border-color:var(--acc); }
-  button:focus-visible, a:focus-visible { outline:2px solid var(--rust); outline-offset:2px; }
-  .cam { margin-top:10px; display:flex; flex-direction:column; gap:8px; }
-  .cam video { width:100%; max-width:560px; border-radius:10px; border:1px solid var(--line); background:#000; }
-  #phoneLink code { color:var(--rust); user-select:all; }
-  .verdict { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-top:4px; }
-  .verdict .kpi { background:#f7f1e6; }
-  .verdict .kpi .v { font-family:var(--serif); font-size:22px; font-weight:560; letter-spacing:-.02em; text-transform:capitalize; line-height:1.15; }
-  .verdict .kpi:nth-child(5) { border-color:var(--rust); }
-  .verdict .kpi .d { color:var(--mute); font-size:12px; margin-top:4px; }
-  .conf { height:4px; border-radius:2px; background:var(--line); margin-top:8px; overflow:hidden; } .conf i { display:block; height:100%; background:var(--rust); }
+  .vsm { display: flex; gap: 8px; overflow-x: auto; padding: 12px 0 4px; }
+  .vsm .box { flex: 1 0 108px; background: #f3ecdf; border: 1px solid rgba(28, 23, 18, 0.22); padding: 10px; font-size: 0.78rem; color: var(--ink-soft); }
+  .vsm .box .n { font-family: var(--serif); font-weight: 560; font-size: 0.95rem; color: var(--ink); margin-bottom: 4px; }
+  .bar { height: 6px; background: var(--rule); margin-top: 6px; overflow: hidden; display: flex; }
+  .bar i { display: block; height: 100%; }
+
+  .rec { border-left: 2px solid var(--rust); padding: 4px 0 4px 12px; margin: 12px 0; }
+  .rec b { font-family: var(--serif); font-weight: 560; }
+  .tag { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--rust-deep); margin-left: 8px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+  th, td { text-align: right; vertical-align: top; padding: 9px 10px 9px 0; border-top: 1px solid var(--rule); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-family: var(--mono); font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
+  .tbl { overflow-x: auto; margin-top: 12px; }
+
+  .creed { margin-top: 56px; padding: 8px 0 12px; }
+  .creed-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(200px, 0.7fr);
+    gap: 36px;
+    align-items: end;
+    margin-top: 18px;
+  }
+  .creed-prose p { margin-top: 14px; font-size: 1.08rem; }
+  .creed-prose p:first-child { margin-top: 0; }
+  blockquote { margin: 0; }
+  blockquote p {
+    margin: 0;
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 520;
+    font-size: clamp(36px, 4.6vw, 60px);
+    line-height: 0.96;
+    letter-spacing: -0.035em;
+    color: var(--rust);
+  }
+  .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; margin-top: 28px; }
+  .step { border-top: 1px solid var(--ink); padding-top: 12px; }
+  .step .n { font-family: var(--serif); font-style: italic; font-size: 1.8rem; color: var(--rust); line-height: 1; }
+  .step h3 { margin: 8px 0 4px; font-family: var(--serif); font-size: 1.2rem; letter-spacing: -0.02em; }
+  .step p { color: var(--ink-soft); font-size: 0.95rem; }
+  .names { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 28px; margin-top: 22px; }
+  .names article { border-top: 1px solid var(--rule); padding-top: 10px; }
+  .names .k { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rust-deep); }
+  .names h3 { margin: 6px 0; font-family: var(--serif); font-size: 1.25rem; letter-spacing: -0.02em; }
+  .names p { color: var(--ink-soft); font-size: 0.95rem; }
+
+  details.books { padding: 18px 22px; }
+  details summary { cursor: pointer; font-family: var(--serif); font-size: 1.35rem; letter-spacing: -0.02em; }
+  .scen { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px 22px; margin-top: 16px; }
+  .scen label { color: var(--ink-soft); font-size: 0.88rem; }
+  .footnote { max-width: 46rem; margin-top: 16px; color: var(--ink-soft); font-size: 0.95rem; }
+
+  .site-foot { display: flex; justify-content: space-between; gap: 24px; padding: 36px 0 56px; }
+  .site-foot strong { font-family: var(--serif); font-size: 1.4rem; font-weight: 560; letter-spacing: -0.03em; }
+  .site-foot p { margin-top: 4px; color: var(--ink-soft); }
+  .colophon { max-width: 32rem; font-size: 0.92rem; }
+  .colophon a { color: var(--rust-deep); }
+
+  @media (max-width: 980px) {
+    .instrument, .creed-grid, .two, .steps, .names { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 760px) {
+    .wrap { width: min(1120px, calc(100% - 28px)); }
+    .mast, .site-foot, .room-head, .demo-head { flex-direction: column; align-items: flex-start; }
+    .hero, .instrument, .creed-grid, .two, .steps, .names, .figures, .case-row, .verdict { grid-template-columns: 1fr; }
+    .stamp { display: none; }
+    h1 { max-width: none; }
+  }
 </style>
 </head>
 <body>
-<nav class="topnav">
-  <a class="brand" href="#top"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="10.5" cy="10.5" r="2.2" fill="#F2A33A"/></svg><b>Muda</b> Lens</a>
-  <div class="navlinks">
-    <a href="#why">Why now</a><a href="#photoCard">Photo</a><a href="#demo">Live line</a><a href="#proof">Proof</a>
-    <a class="gh" href="https://github.com/manjeetsingh-satveer/muda-lens" target="_blank" rel="noopener">GitHub ↗</a>
-  </div>
-</nav>
+  <a class="skip" href="#photoCard">Skip to the bench</a>
+  <header class="mast wrap">
+    <a class="brand" href="#top">
+      <svg class="mark" viewBox="0 0 36 36" aria-hidden="true">
+        <circle cx="18" cy="18" r="12" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <circle cx="18" cy="18" r="1.7" fill="currentColor"/>
+        <path d="M18 2.5v5.2M18 28.3v5.2M2.5 18h5.2M28.3 18h5.2" stroke="currentColor" stroke-width="1.4"/>
+      </svg>
+      <span>
+        <strong>Muda Lens</strong>
+        <em>For the person who speaks first at standup.</em>
+      </span>
+    </a>
+    <nav class="nav" aria-label="Page">
+      <a href="#photoCard">The bench</a>
+      <a href="#why">Why now</a>
+      <a href="#demo">The line</a>
+      <a href="#proof">The proof</a>
+      <a href="https://github.com/manjeetsingh-satveer/muda-lens" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </header>
 
-<header class="hero" id="top">
-  <div class="hero-in">
-    <p class="eyebrow">For the person who speaks first at standup</p>
-    <h1>Most of a chip’s life is spent waiting.</h1>
-    <p class="h1b">That is not the work.</p>
-    <p class="lead">Show it the line, or a photo from the floor. It names the waste, where it started, and whether the lots should ship. <b>Drex</b> does the reading. A person still makes the call.</p>
-    <div class="cta">
-      <a class="btn primary" href="#photoCard">Diagnose a photo</a>
-      <a class="btn" href="#proof">See the benchmark</a>
-    </div>
-    <div class="stats">
-      <div class="stat"><span class="big">94.3%</span><span class="lbl">all 4 decisions right on 70 test cases<br><span class="mute">Claude Opus 5.5: 92.9% · rules: 67.1%</span></span></div>
-      <div class="stat"><span class="big">8×</span><span class="lbl">faster than a frontier LLM<br><span class="mute">283 ms vs. 2,313 ms median</span></span></div>
-      <div class="stat"><span class="big" style="color:var(--rust)">105×</span><span class="lbl">cheaper per decision<br><span class="mute">$0.16 vs. $17.18 per 1,000</span></span></div>
-    </div>
-  </div>
-</header>
-
-<section class="band" id="why">
-  <div class="band-in">
-    <p class="eyebrow">The problem</p>
-    <h2 class="sect">A chip spends most of its life in a fab <em>waiting</em>.</h2>
-    <p class="lead narrow">In our model of a 12-step power-device line, only 12% of lead time is real work. The rest is muda: queues, holds, extra inspections, long moves. The data to catch it already exists. The judgment to act on it is scarce.</p>
-    <p class="eyebrow" style="margin-top:36px">Why now</p>
-    <div class="trio">
-      <div class="tile"><span class="k">01 · More fabs</span><h3>New lines must ramp fast</h3><p>Governments are funding new fabs in the US, Europe and Asia. Every new line has to get its yield up quickly.</p></div>
-      <div class="tile"><span class="k">02 · Fewer experts</span><h3>~67,000 short by 2030</h3><p>The projected US shortfall of semiconductor workers (SIA &amp; Oxford Economics, 2023). There aren’t enough black belts to go round.</p></div>
-      <div class="tile"><span class="k">03 · Cheap decisions</span><h3>A cent buys ~60 calls</h3><p>Decision models like Drex answer in ~0.3 s for $0.16 per 1,000. Expert judgment can now run on every lot.</p></div>
-    </div>
-    <p class="eyebrow" style="margin-top:36px">How it works</p>
-    <div class="steps">
-      <div class="step"><span class="n">1</span><div><h3>Line data or photos in</h3><p>Lot data from 12 process steps, or up to 8 photos of dies, bonds, charts or racks.</p></div></div>
-      <div class="step"><span class="n">2</span><div><h3>Lean + Six Sigma do the math</h3><p>Value stream, 8 wastes, DPMO, Cpk. Only real changes vs. normal go forward.</p></div></div>
-      <div class="step"><span class="n">3</span><div><h3>Drex makes the call</h3><p>Waste, culprit step, countermeasure, release / hold / rework, with confidence. Unsure? It asks an engineer.</p></div></div>
-    </div>
-  </div>
-</section>
-<main>
-  <section class="demo-head" id="demo">
-    <div>
-      <p class="eyebrow">Live line</p>
-      <h2 class="sect">Pick a scenario. Watch the waste show up.</h2>
-    </div>
-    <div class="controls">
-      <select id="scenario" aria-label="Scenario">
-        <option value="baseline">Scenario: Baseline fab</option>
-        <option value="litho">Scenario: Litho bottleneck + CD drift</option>
-        <option value="backend">Scenario: Wire-bond defect spike</option>
-        <option value="improved">Scenario: After kaizen (improved)</option>
-      </select>
-      <button class="primary" id="run">Run diagnosis</button>
-      <label class="file">Upload lot CSV <input type="file" id="csv" accept=".csv" hidden></label>
-      <button id="dl">Download sample CSV</button>
-    </div>
-  </section>
-  <section class="grid kpis" id="kpis"></section>
-
-  <section class="card" style="margin-bottom:16px">
-    <h2>Value stream map</h2>
-    <p class="hint">Teal = value-add time, amber = waiting. Process cycle efficiency (PCE) per step.</p>
-    <div class="vsm" id="vsm"></div>
-  </section>
-
-  <section class="grid two">
-    <div class="card"><h2>Muda Pareto (cost of waste)</h2><p class="hint">The 80/20 view: fix the left bars first.</p><canvas id="pareto" height="220"></canvas></div>
-    <div class="card"><h2>Waste by process step</h2><p class="hint">Stacked $ by waste type.</p><canvas id="stack" height="220"></canvas></div>
-  </section>
-
-  <section class="grid two" style="margin-top:16px">
-    <div class="card"><h2>Process capability (Cpk) by step</h2><p class="hint">Six Sigma target ≥ 1.33 (dashed). Below 1.0 = not capable.</p><canvas id="cpk" height="220"></canvas></div>
-    <div class="card"><h2>DMAIC action plan</h2><p class="hint">Auto-generated from the data — the starting point for the team's kaizen.</p><div id="recs"></div></div>
-  </section>
-
-  <section class="card bench" id="photoCard">
-    <div class="bench-head">
-      <p class="eyebrow">On the line</p>
-      <h2>Show Drex what you see.</h2>
-      <p class="bench-lead">A die under the scope, a wire bond, a chart, a rack of lots waiting. Drex reads up to eight photos and says what the waste is, which fix to run, and whether those lots should ship.</p>
-    </div>
-    <div class="bench-grid">
+  <main id="top">
+    <section class="hero wrap">
       <div>
+        <p class="kicker">A reading glass for a wafer line</p>
+        <h1>Most of a chip’s life is spent waiting.</h1>
+        <p class="h1b">That is not the work.</p>
+        <p class="dek">Show it the line, or a photo from the floor. It names the waste, where it started, and whether the lots should ship. <b>Drex</b> does the reading. A person still makes the call.</p>
+      </div>
+      <div class="stamp" aria-hidden="true">
+        <span>Read</span>
+        <strong>the line</strong>
+        <span>out loud</span>
+      </div>
+      <div class="score">
+        <p class="score-kicker">All four decisions right</p>
+        <p class="score-num">94.3%</p>
+        <p class="score-sub">On 70 test cases. Claude Opus 5.5 lands at 92.9%. A rules baseline lands at 67.1%.</p>
+      </div>
+      <div class="figures">
+        <div>
+          <b>8×</b>
+          <span>Faster than a frontier model. 283 ms against 2,313 ms.</span>
+        </div>
+        <div class="hot">
+          <b>105×</b>
+          <span>Cheaper. $0.16 against $17.18 per thousand calls.</span>
+        </div>
+      </div>
+      <div class="presets">
+        <span>Start with what you can hold.</span>
+        <a href="#photoCard">Diagnose a photo</a>
+        <a href="#proof">See the benchmark</a>
+      </div>
+    </section>
+
+    <section class="instrument wrap" id="photoCard" aria-label="Photo bench">
+      <div class="room">
+        <div class="room-head">
+          <strong>Photo bench</strong>
+          <span>A die, a bond, a chart, a rack.</span>
+        </div>
         <label class="drop" id="drop" for="photos">
           <input type="file" id="photos" accept="image/png,image/jpeg,image/webp" multiple hidden>
           <span class="drop-copy"><strong>Drop the photo here</strong><em>or click to choose. PNG, JPEG, or WebP.</em></span>
@@ -248,13 +481,13 @@
           <button type="button" class="case" data-sample="bond" aria-pressed="false"><span>Wire bond</span><strong>Lifted bond</strong><em>One wire never lands on the pad.</em></button>
           <button type="button" class="case" data-sample="wip" aria-pressed="false"><span>Probe</span><strong>Rack on hold</strong><em>Thirty-six lots waiting. Testers are down.</em></button>
         </div>
-        <div class="controls" style="margin-top:12px">
+        <div class="photo-tools">
           <button id="takePhoto" type="button">Take a photo</button>
           <input type="file" id="phoneCam" accept="image/*" capture="environment" hidden>
         </div>
         <div class="cam" id="cam" hidden>
           <video id="camVideo" autoplay playsinline muted></video>
-          <div class="controls">
+          <div class="photo-tools">
             <button class="primary" id="snap" type="button">Capture</button>
             <button id="camClose" type="button">Close camera</button>
             <span class="sub" id="camMsg"></span>
@@ -263,7 +496,8 @@
         <p class="sub" id="phoneLink" hidden></p>
         <div class="thumbs" id="thumbs"></div>
       </div>
-      <div class="bench-ask">
+      <aside class="reading">
+        <p class="kicker">The call</p>
         <div class="photo-form">
           <label for="photoStep">Where on the line
             <select id="photoStep"><option value="">Not specified</option></select>
@@ -279,44 +513,122 @@
         </div>
         <div id="photoResult"></div>
         <p class="bench-empty">The call lands here. What it shows. The defect. The waste. The fix. And whether the lots ship.</p>
+      </aside>
+    </section>
+
+    <section class="creed wrap" id="why">
+      <p class="kicker">Why a person would use this</p>
+      <h2>A chip spends most of its life in a fab waiting.</h2>
+      <div class="creed-grid">
+        <div class="creed-prose">
+          <p>In this model of a 12-step power-device line, only 12% of lead time is real work. The rest is muda: queues, holds, extra inspections, long moves. The data to catch it already exists. The judgment to act on it is scarce.</p>
+          <p>New lines have to ramp. The projected US shortfall of semiconductor workers is about 67,000 by 2030 (SIA &amp; Oxford Economics, 2023). There are not enough black belts to stand at every queue. A decision that costs $0.16 per thousand can run on every lot. An engineer still owns the call.</p>
+        </div>
+        <blockquote>
+          <p>Name the waste.<br>Then the lots can move.</p>
+        </blockquote>
       </div>
+      <div class="names">
+        <article><span class="k">01 · More fabs</span><h3>New lines must ramp fast</h3><p>Governments are funding new fabs in the US, Europe and Asia. Every new line has to get its yield up quickly.</p></article>
+        <article><span class="k">02 · Fewer experts</span><h3>The shortfall is already counted</h3><p>About 67,000 semiconductor workers short in the US by 2030. The people who can read a line are the constraint.</p></article>
+        <article><span class="k">03 · Cheap decisions</span><h3>A cent buys about sixty calls</h3><p>Drex answers in about 0.3 seconds for $0.16 per 1,000. Expert judgment can now run on every lot.</p></article>
+      </div>
+      <div class="steps">
+        <div class="step"><span class="n">1</span><h3>Line data or photos in</h3><p>Lot data from 12 process steps, or up to 8 photos of dies, bonds, charts or racks.</p></div>
+        <div class="step"><span class="n">2</span><h3>Lean and Six Sigma do the math</h3><p>Value stream, eight wastes, DPMO, Cpk. Only real changes against normal go forward.</p></div>
+        <div class="step"><span class="n">3</span><h3>Drex makes the call</h3><p>Waste, culprit step, countermeasure, release, hold or rework, with confidence. Unsure, it asks an engineer.</p></div>
+      </div>
+    </section>
+
+    <section class="sheet wrap" id="demo">
+      <div class="demo-head">
+        <div>
+          <p class="kicker">The line</p>
+          <h2>Pick a week. Watch the waste show up.</h2>
+        </div>
+        <div class="controls">
+          <select id="scenario" aria-label="Scenario">
+            <option value="baseline">Baseline fab</option>
+            <option value="litho">Litho bottleneck and CD drift</option>
+            <option value="backend">Wire-bond defect spike</option>
+            <option value="improved">After kaizen</option>
+          </select>
+          <button class="primary" id="run" type="button">Run diagnosis</button>
+          <label class="file">Upload lot CSV <input type="file" id="csv" accept=".csv" hidden></label>
+          <button id="dl" type="button">Download sample CSV</button>
+        </div>
+      </div>
+      <div class="kpis" id="kpis"></div>
+      <h2 style="margin-top:22px">Value stream</h2>
+      <p class="hint">Teal is time on the tool. Amber is waiting. The rest of the bar is the life of the lot.</p>
+      <div class="vsm" id="vsm"></div>
+    </section>
+
+    <section class="two pair wrap">
+      <div class="sheet" style="margin-top:0">
+        <h2>Where the money sits</h2>
+        <p class="hint">Fix the left bars first. The line is the running total.</p>
+        <canvas id="pareto" height="220"></canvas>
+      </div>
+      <div class="sheet" style="margin-top:0">
+        <h2>Waste by step</h2>
+        <p class="hint">Stacked dollars, one column per step.</p>
+        <canvas id="stack" height="220"></canvas>
+      </div>
+    </section>
+
+    <section class="two pair wrap">
+      <div class="sheet" style="margin-top:0">
+        <h2>Can the step hold a spec</h2>
+        <p class="hint">The dashed line is Cpk 1.33. Under 1.0, the step is not capable.</p>
+        <canvas id="cpk" height="220"></canvas>
+      </div>
+      <div class="sheet" style="margin-top:0">
+        <h2>What to say at the meeting</h2>
+        <p class="hint">Drawn from this week’s data. A starting point, not the kaizen.</p>
+        <div id="recs"></div>
+      </div>
+    </section>
+
+    <section class="sheet wrap" id="drexCard">
+      <p class="kicker">On this week’s data</p>
+      <h2>Drex decides.</h2>
+      <p class="hint">Which waste, which step, which countermeasure, and what to do with the lots. The frontier model and the rules can answer the same questions.</p>
+      <div class="controls">
+        <button class="primary" id="askDrex" type="button">Ask Drex</button>
+        <button id="askAll" type="button">Drex, Claude, and the rules</button>
+        <span class="sub" id="drexStatus"></span>
+      </div>
+      <div class="tbl"><table id="decide"></table></div>
+      <div id="decideNote"></div>
+    </section>
+
+    <section class="sheet wrap" id="proof">
+      <p class="kicker">The proof</p>
+      <h2>Cases with a known answer.</h2>
+      <p class="hint">Each case has one known fault and a decoy. A contender scores only if all four decisions are right. Run <code>npm run bench</code> to regenerate.</p>
+      <div id="arena"><span class="sub">No results yet.</span></div>
+    </section>
+
+    <section class="sheet wrap">
+      <h2>The scorecard, step by step</h2>
+      <div class="tbl"><table id="tbl"></table></div>
+    </section>
+
+    <details class="books wrap">
+      <summary>The cost books. Change them if this is not your fab.</summary>
+      <div class="scen" id="costs"></div>
+      <p class="footnote">Dollars here are the cost of waste in the model, not scrap on a customer’s line. All of the lot data is synthetic, modelled on a power-MOSFET flow. Bring your own CSV with columns: <code id="cols"></code></p>
+    </details>
+  </main>
+
+  <footer class="wrap site-foot">
+    <div>
+      <strong>Muda Lens</strong>
+      <p>Name the waste. Then the lots can move.</p>
     </div>
-  </section>
-
-  <section class="card" style="margin-top:16px" id="drexCard">
-    <h2>Drex decides, on this week’s data</h2>
-    <p class="hint">Drex reads the line's data against its historical baseline and decides: which waste, which step, which countermeasure, and what to do with the lots. You can run the frontier LLM and rules on the same data for comparison.</p>
-    <div class="controls" style="margin-bottom:10px">
-      <button class="primary" id="askDrex">Ask Drex</button>
-      <button id="askAll">Drex vs. Claude vs. Rules</button>
-      <span class="sub" id="drexStatus"></span>
-    </div>
-    <div class="tbl"><table id="decide"></table></div>
-    <div id="decideNote"></div>
-  </section>
-
-  <section class="card proof" style="margin-top:16px" id="proof">
-    <p class="eyebrow">The proof</p>
-    <h2>The arena, on cases with a known answer</h2>
-    <p class="hint">Each case has one known injected fault plus a decoy problem. A contender scores only if all 4 decisions are right. Run <code>npm run bench</code> to regenerate.</p>
-    <div id="arena"><span class="sub">No results yet.</span></div>
-  </section>
-
-  <section class="card" style="margin-top:16px">
-    <h2>Step-level Six Sigma scorecard</h2>
-    <div class="tbl"><table id="tbl"></table></div>
-  </section>
-
-  <details class="card">
-    <summary>Cost assumptions ($) — edit to match your fab</summary>
-    <div class="scen" id="costs"></div>
-  </details>
-</main>
-<footer>
-  <p><b>Muda Lens</b> · Name the waste. Then the lots can move.</p>
-  <p>Built by Manjeet Singh &amp; Vani · <a href="https://github.com/manjeetsingh-satveer/muda-lens" target="_blank" rel="noopener">github.com/manjeetsingh-satveer/muda-lens</a></p>
-  <p>All data is synthetic and modelled on a power-MOSFET line; no employer data is used. Bring your own via CSV with columns: <code id="cols"></code></p>
-</footer>
+    <p class="colophon">Set in Fraunces and IBM Plex, on paper, with one red. Built by Manjeet Singh &amp; Vani. <a href="https://github.com/manjeetsingh-satveer/muda-lens" target="_blank" rel="noopener">github.com/manjeetsingh-satveer/muda-lens</a></p>
+  </footer>
 
 <script src="src/engine.js"></script>
 <script src="src/app.js"></script>

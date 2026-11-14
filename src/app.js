@@ -18,7 +18,7 @@
     return `<span class="pill ${cls}">${fmt(v)}</span>`;
   };
 
-  Chart.defaults.color = "#5c564c"; Chart.defaults.borderColor = "#d3c6b2"; Chart.defaults.font.family = "IBM Plex Sans, system-ui, sans-serif";
+  Chart.defaults.color = "#4e473f"; Chart.defaults.borderColor = "#d5c9b6"; Chart.defaults.font.family = "IBM Plex Sans, system-ui, sans-serif";
 
   function chart(id, cfg) { if (charts[id]) charts[id].destroy(); charts[id] = new Chart($(id), cfg); }
 
@@ -78,7 +78,7 @@
   // API can't be reached: on the public site, or if the venue network blocks the API mid-demo.
   let RECORDED = {};
   fetch("bench/recorded.json").then(r => r.ok ? r.json() : {}).then(j => { RECORDED = j || {}; }).catch(() => {});
-  const recNote = when => `<p class="recnote">▶ Replaying a recorded live Drex run from ${esc(new Date(when).toLocaleString())}. The live API isn’t reachable from here right now.</p>`;
+  const recNote = when => `<p class="recnote">A recorded Drex run from ${esc(new Date(when).toLocaleString())}. The live API isn’t reachable from here right now.</p>`;
   const liveFailed = e => /fetch|Failed|NetworkError|HTTP 4|HTTP 5|403|429|5\d\d|not configured|Server returned/i.test(e.message);
 
   async function decide(contenders) {
@@ -220,7 +220,7 @@
   // --- Phone link: open the same page on a phone on this Wi-Fi to snap photos ---
   fetch("api/status").then(r => r.json()).then(s => {
     if (s.lan?.length && !isPhone) { $("phoneLink").hidden = false;
-      $("phoneLink").innerHTML = `📱 On a phone on the same Wi-Fi, open <code>${esc(s.lan[0])}</code> and tap “Take a photo”.`; }
+      $("phoneLink").innerHTML = `On a phone on the same Wi-Fi, open <code>${esc(s.lan[0])}</code> and tap “Take a photo”.`; }
   }).catch(() => {});
 
   const NICE = s => String(s ?? "—").replace(/_/g, " ");
