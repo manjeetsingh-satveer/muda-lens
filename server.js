@@ -4,7 +4,7 @@
 const http = require("node:http"), fs = require("node:fs"), path = require("node:path");
 try { process.loadEnvFile?.(path.join(__dirname, ".env")); } catch {}
 const F = require("./src/engine.js");
-const { summarize, HISTORY, PRIORITY } = require("./bench/cases.js");
+const { buildState } = require("./bench/cases.js");
 const C = require("./bench/contenders.js");
 
 const PORT = Number(process.env.PORT || 5173);
@@ -18,7 +18,7 @@ const server = http.createServer(async (req, res) => {
     let body = ""; for await (const chunk of req) { body += chunk; if (body.length > 5e6) return json(res, 413, { error: "too large" }); }
     try {
       const { rows, contenders = ["drex"] } = JSON.parse(body);
-      const state = { line: "Power MOSFET wafer-to-package line", plant_rule: PRIORITY, current_week: summarize(F.analyze(rows)), historical_baseline: HISTORY };
+      const state = buildState(rows);
       const out = {};
       await Promise.all(contenders.filter(n => ["drex", "claude", "rules"].includes(n)).map(async n => {
         if (!C[n].enabled()) { out[n] = { label: C[n].label(), error: "not configured" }; return; }

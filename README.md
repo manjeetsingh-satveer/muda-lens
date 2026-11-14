@@ -33,10 +33,14 @@ A case counts as correct only if **all 4 decisions** are right. The same data an
 | Contender | All-4 correct | $ / 1k decisions | p50 latency |
 |---|---|---|---|
 | Rule-based SPC (no AI) | 67.1% | $0 | <1 ms |
-| **Drex (drex-max-v1.1)** | **74.3%** | **$0.27** | 429 ms |
+| **Drex (drex-max-v1.1)** | **94.3%** | **$0.16** | 272 ms |
 | Claude Opus 5.5 | run `npm run bench` | | |
 
-Drex gets 17/20 parameter-drift and variation cases right; the rules engine gets 4/20 because it falls for the decoys. Drex is weaker on transport (5/10) and over-inspection (6/10), which is the next thing to improve.
+Drex gets **30/30 quality cases** (drift, variation, defect spikes) right; the rules engine gets 11/30 because it falls for the decoys.
+
+**How we got from 74% to 94%:** in the first version Drex read raw numbers in mixed units (queue hours, transport metres, inspection counts) and sometimes picked whichever looked biggest. Now the Lean/SPC analytics compute a `changes_vs_baseline` table (only increases beyond normal noise, each tagged with its waste family), and Drex makes the judgment call: which change matters most under the plant rule. The input is shorter too, so the cost dropped from $0.27 to $0.16 per 1k decisions. To avoid tuning on the test set, we tuned on a **separate dev split** (`npm run bench -- --split dev`, different seeds) and scored the 70 test cases once: dev 94.3%, test 94.3%.
+
+**Calibrated hand-off:** when Drex's lowest confidence across the 4 decisions is below 50%, the dashboard sends the case to an engineer. On the test set that let Drex decide 69/70 cases on its own at 95.7% accuracy.
 
 ## Run it
 

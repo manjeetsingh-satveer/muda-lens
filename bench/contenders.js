@@ -2,7 +2,7 @@
 //   drex   - Nace.AI Drex decision model: one pass, typed choice questions, probabilities back
 //   claude - frontier LLM baseline (Claude Opus 5.5) with JSON-schema structured output
 //   rules  - classic hand-written Six Sigma heuristics (no AI), the "do nothing smart" floor
-const { QUESTIONS } = require("./cases.js");
+const { QUESTIONS, HISTORY } = require("./cases.js");
 
 // ---------------- Drex ----------------
 // Configure via env (see .env.example). Request/response follow Nace's System One format:
@@ -78,7 +78,7 @@ claude.label = () => `Claude (${CLAUDE_MODEL()})`;
 // Picks the step/metric with the largest relative change vs. baseline.
 async function rules(state) {
   const t0 = Date.now();
-  const cur = state.current_week, base = Object.fromEntries(state.historical_baseline.map(s => [s.step, s]));
+  const cur = state.current_week, base = Object.fromEntries((state.historical_baseline || HISTORY).map(s => [s.step, s]));
   let best = { score: 0 };
   const consider = (score, step, a) => { if (score > best.score) best = { score, step, ...a }; };
   for (const s of cur) {

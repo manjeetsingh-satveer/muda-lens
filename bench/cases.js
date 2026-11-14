@@ -88,7 +88,35 @@ function summarize(res) {
 
 const HISTORY = summarize(F.analyze(F.generateLots({ lots: 200, seed: 1 }))); // the line's "normal" behavior
 
-function buildCases(n = 70, seed = 2026) {
+// Pre-computed change vs. baseline, so the decision model judges instead of doing arithmetic
+// across mixed units. Only metrics that moved beyond normal noise are listed.
+function changes(cur) {
+  const base = Object.fromEntries(HISTORY.map(s => [s.step, s]));
+  const pct = (a, b) => Math.round(((a + 1) / (b + 1) - 1) * 100);
+  const out = [];
+  for (const s of cur) {
+    const b = base[s.step], sig = [];
+    const add = (metric, kind, value, unit, threshold) => { if ((metric === "mean_offset" ? Math.abs(value) : value) >= threshold) sig.push({ metric, waste_family: kind, change: value + unit }); };
+    add("queue_time", "flow:waiting", pct(s.queue_h, b.queue_h), "%", 30);
+    add("transport_distance", "flow:transportation", pct(s.transport_m_per_lot, b.transport_m_per_lot), "%", 30);
+    add("extra_inspections", "flow:overprocessing", pct(s.extra_inspections, b.extra_inspections), "%", 50);
+    add("manual_overrides", "flow:skills", pct(s.manual_overrides, b.manual_overrides), "%", 50);
+    add("defects_dpmo", "quality:defect_count", pct(s.dpmo, b.dpmo), "%", 80);
+    add("process_sigma", "quality:variation", Math.round((s.sigma / b.sigma - 1) * 100), "%", 35);
+    add("mean_offset", "quality:mean_shift", +((s.mean - b.mean) / b.sigma).toFixed(1), " sigma", 1.2);
+    if (sig.length) out.push({ step: s.step, name: s.name, cpk_now: s.cpk, cpk_baseline: b.cpk, significant_changes: sig });
+  }
+  return out;
+}
+
+function buildState(rows, version = process.env.STATE_VERSION || "v2") {
+  const current = summarize(F.analyze(rows));
+  const base = { line: "Power MOSFET wafer-to-package line (synthetic)", plant_rule: PRIORITY };
+  if (version === "v1") return { ...base, current_week: current, historical_baseline: HISTORY };
+  return { ...base, changes_vs_baseline: changes(current), current_week: current };
+}
+
+function buildCases(n = 70, seed = 2026, dataSeed = 1000) {
   const r = rng(seed);
   const kinds = Object.keys(FAULTS);
   const cases = [];
@@ -113,14 +141,14 @@ function buildCases(n = 70, seed = 2026) {
     const decoyStep = others[Math.floor(r() * others.length)];
     const decoySev = quality ? 0.6 + 0.4 * r() : 0.35 + 0.15 * r();
     drift[decoyStep] = { ...drift[decoyStep], ...scale(FAULTS[decoyKind].drift, decoySev) };
-    const rows = F.generateLots({ lots: 120, seed: 1000 + i, drift });
+    const rows = F.generateLots({ lots: 120, seed: dataSeed + i, drift });
     cases.push({
       id: `case-${String(i + 1).padStart(3, "0")}`, kind, decoy: { kind: decoyKind, step: decoyStep },
       truth: { ...FAULTS[kind].truth, culprit_step: step },
-      state: { line: "Power MOSFET wafer-to-package line (synthetic)", plant_rule: PRIORITY, current_week: summarize(F.analyze(rows)), historical_baseline: HISTORY },
+      state: buildState(rows),
     });
   }
   return cases;
 }
 
-module.exports = { QUESTIONS, FAULTS, PRIORITY, buildCases, summarize, HISTORY };
+module.exports = { QUESTIONS, FAULTS, PRIORITY, buildCases, buildState, summarize, HISTORY };

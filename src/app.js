@@ -83,7 +83,8 @@
       $("decide").innerHTML = `<tr><th>Contender</th>${Q.map(q => `<th>${q.replace("_", " ")}</th>`).join("")}<th>Latency</th><th>Cost</th></tr>` +
         Object.values(out).map(o => o.error ? `<tr><td>${esc(o.label)}</td><td colspan="6" style="text-align:left;color:var(--warn)">${esc(o.error)}</td></tr>` :
           `<tr><td>${esc(o.label)}</td>${Q.map(q => `<td>${esc(o.answers[q])}${o.confidence?.[q] != null ? ` <span class="sub">${(o.confidence[q] * 100).toFixed(0)}%</span>` : ""}</td>`).join("")}
-           <td>${o.latencyMs} ms</td><td>$${o.costUsd.toFixed(6)}</td></tr>`).join("");
+           <td>${o.latencyMs} ms</td><td>$${o.costUsd.toFixed(6)}</td></tr>` +
+          (o.confidence && Math.min(...Q.map(q => o.confidence[q] ?? 1)) < 0.5 ? `<tr><td colspan="7" style="text-align:left;color:var(--warn)">⚠ Low confidence on at least one decision: route to an engineer for review.</td></tr>` : "")).join("");
       $("drexStatus").textContent = "";
     } catch (e) { $("drexStatus").textContent = e.message.includes("fetch") ? "Live calls need the server: run `npm start`." : e.message; }
   }

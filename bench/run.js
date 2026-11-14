@@ -10,13 +10,16 @@ const C = require("./contenders.js");
 
 const arg = k => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : undefined; };
 const N = Number(arg("--n") || 70), CONC = Number(arg("--concurrency") || 4);
+// --split dev: separate seeds used ONLY for tuning; the default test split is what we report
+const DEV = arg("--split") === "dev";
+const ONLY = arg("--only");
 
 async function pool(items, n, fn) { const out = []; let i = 0; await Promise.all(Array.from({ length: n }, async () => { while (i < items.length) { const j = i++; out[j] = await fn(items[j]); } })); return out; }
 
 (async () => {
-  const cases = buildCases(N);
-  const names = ["drex", "claude", "rules"];
-  const results = { generatedAt: new Date().toISOString(), cases: cases.length, questions: Object.keys(QUESTIONS), contenders: {} };
+  const cases = DEV ? buildCases(N, 777, 50000) : buildCases(N);
+  const names = ONLY ? ONLY.split(",") : ["drex", "claude", "rules"];
+  const results = { split: DEV ? "dev" : "test", stateVersion: process.env.STATE_VERSION || "v2", generatedAt: new Date().toISOString(), cases: cases.length, questions: Object.keys(QUESTIONS), contenders: {} };
 
   for (const name of names) {
     const fn = C[name];
@@ -43,6 +46,6 @@ async function pool(items, n, fn) { const out = []; let i = 0; await Promise.all
     const s = results.contenders[name];
     console.log(`  all-4-correct ${(exact * 100).toFixed(1)}% | p50 ${s.latencyMsP50} ms | $${s.costPer1kDecisionsUsd.toFixed(4)} / 1k decisions | errors ${s.errors}`);
   }
-  fs.writeFileSync(path.join(__dirname, "results.json"), JSON.stringify(results, null, 2));
-  console.log("Wrote bench/results.json");
+  fs.writeFileSync(path.join(__dirname, DEV ? "results-dev.json" : "results.json"), JSON.stringify(results, null, 2));
+  console.log("Wrote bench/" + (DEV ? "results-dev.json" : "results.json"));
 })();
