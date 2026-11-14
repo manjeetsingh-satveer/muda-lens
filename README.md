@@ -59,6 +59,19 @@ npm test
 
 You can use Drex hosted (Nace console) or with open weights run locally (`serve.py` from `nace-ai/drex-decision-models`, then `DREX_BASE_URL=http://127.0.0.1:8000`).
 
+## Run it with Intern
+
+[Intern](https://github.com/nace-ai/intern) can work this repository. Its System 2 does the reading and the edits. Drex, as System 1, watches every turn. `AGENTS.md` is the brief it reads from this repo: synthetic data only, keys stay in `.env`, and a bench case counts only when all four decisions are right.
+
+```bash
+uv tool install "intern-agent @ git+https://github.com/nace-ai/intern"
+export NACE_API_KEY=...          # System 1: Drex
+export OPENROUTER_API_KEY=...    # System 2: any chat model you choose
+intern --system1 decisions:nace-ai/drex-max \
+  --system2 openrouter/qwen/qwen3.8-27b \
+  "Read this fab and say which waste to name at standup, and whether the lots should ship."
+```
+
 ## Photo diagnosis (Drex Max reads images)
 
 An engineer uploads up to 8 photos from the line: a die under the microscope, wire bonds, an SPC chart screenshot, a shelf of waiting lots, or the shop-floor layout. Drex Max answers six typed questions about them in one pass: **what it shows, defect type, Lean waste, countermeasure, lot disposition, and severity**, each with a confidence value. When any answer is under 50% confident, the page asks for an engineer's review. Photos are downscaled in the browser to stay under the API's 4 MiB request limit.
