@@ -229,9 +229,9 @@
   .case-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   .case.real { min-height: 0; }
   .case[aria-pressed="true"] { border-color: var(--rust); box-shadow: inset 0 0 0 1px var(--rust); }
-  .reading { font-family: var(--serif); font-style: italic; color: var(--rust); font-size: 1.15rem; animation: pulse 1.2s ease-in-out infinite alternate; }
+  .drex-reading { font-family: var(--serif); font-style: italic; color: var(--rust); font-size: 1.15rem; animation: pulse 1.2s ease-in-out infinite alternate; }
   @keyframes pulse { from { opacity: .45; } to { opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) { .reading { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .drex-reading { animation: none; } }
   .case.real img { width: 100%; height: 84px; object-fit: cover; display: block; margin-bottom: 6px; filter: sepia(0.15); }
   .cases-k.credit { font-size: 0.8rem; margin-top: 8px; } .cases-k.credit a { color: inherit; }
   .case {
@@ -300,6 +300,25 @@
   #phoneLink code { color: var(--rust-deep); user-select: all; }
   [hidden] { display: none !important; }
 
+  /* Drex's call: one headline verdict, then the six answers as a tidy ledger */
+  #photoResult, #photoResult * { font-style: normal; }
+  .call-card { margin-top: 10px; padding: 18px 20px 16px; background: #FFFAF3; border: 1px solid var(--rule); border-left: 4px solid var(--green); }
+  .call-card.bad { border-left-color: var(--rust); }
+  .call-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .call-k { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+  .sev { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border: 1px solid currentColor; }
+  .sev-low { color: var(--green); } .sev-medium { color: var(--warn); } .sev-high, .sev-critical { color: var(--rust); }
+  .call-h { margin: 8px 0 4px; font-family: var(--serif); font-size: 1.75rem; font-weight: 620; letter-spacing: -0.03em; line-height: 1.1; color: var(--ink); }
+  .call-card.bad .call-h { color: var(--rust-deep); } .call-card.good .call-h { color: var(--green); }
+  .call-s { margin: 0; color: var(--ink-soft); font-size: 0.98rem; line-height: 1.45; }
+  .facts { margin-top: 12px; border-top: 1px solid var(--rule); }
+  .fact { display: grid; grid-template-columns: 7.5em 1fr 64px 3em; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--rule); }
+  .fl { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
+  .fv { font-weight: 600; color: var(--ink); font-size: 0.95rem; min-width: 0; }
+  .fc { height: 3px; background: var(--rule); } .fc i { display: block; height: 100%; background: var(--ink-soft); }
+  .fp { font-family: var(--mono); font-size: 0.78rem; color: var(--ink-soft); text-align: right; font-variant-numeric: tabular-nums; } .fp.low { color: var(--warn); font-weight: 600; }
+  .call-meta { margin: 10px 0 0; font-family: var(--mono); font-size: 0.72rem; color: var(--faint); }
+  .call-warn { margin: 8px 0 0; padding: 8px 10px; background: #F3E3D8; color: var(--rust-deep); font-size: 0.88rem; }
   .verdict { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; margin-top: 8px; }
   .kpi { background: transparent; border: 0; border-top: 1px solid var(--rule); padding: 10px 0 12px; }
   .kpi .l { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }

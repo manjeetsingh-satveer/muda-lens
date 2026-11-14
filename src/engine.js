@@ -23,14 +23,14 @@
   ];
 
   const WASTES = {
-    T: { name: "Transportation", color: "#5B8DEF" },
-    I: { name: "Inventory (WIP)", color: "#9B6EE8" },
-    M: { name: "Motion", color: "#2BB5A8" },
-    W: { name: "Waiting", color: "#F2A33A" },
-    O: { name: "Over-processing", color: "#E86FA5" },
-    P: { name: "Over-production", color: "#8C9BAB" },
-    D: { name: "Defects", color: "#E5484D" },
-    S: { name: "Skills (unused talent)", color: "#7BC86C" },
+    T: { name: "Transportation", color: "#5B7A8C" },
+    I: { name: "Inventory (WIP)", color: "#7D6B91" },
+    M: { name: "Motion", color: "#4F8072" },
+    W: { name: "Waiting", color: "#C08A2E" },
+    O: { name: "Over-processing", color: "#B0657A" },
+    P: { name: "Over-production", color: "#9A8F7E" },
+    D: { name: "Defects", color: "#9C341F" },
+    S: { name: "Skills (unused talent)", color: "#6E8A4E" },
   };
 
   // ---------- deterministic RNG so demos are reproducible ----------

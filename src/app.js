@@ -37,7 +37,7 @@
     const maxLead = Math.max(...res.steps.map(s => s.va + s.queue));
     $("vsm").innerHTML = res.steps.map(s => `<div class="box"><div class="n">${s.name}</div>
       VA ${(s.va / 60).toFixed(1)}h · Wait ${(s.queue / 60).toFixed(1)}h<br>PCE ${(s.pce * 100).toFixed(0)}%
-      <div class="bar" style="display:flex"><i style="width:${s.va / maxLead * 100}%;background:#3fc1b0"></i><i style="width:${s.queue / maxLead * 100}%;background:#f2a33a"></i></div></div>`).join("");
+      <div class="bar" style="display:flex"><i style="width:${s.va / maxLead * 100}%;background:#2f7a6c"></i><i style="width:${s.queue / maxLead * 100}%;background:#c08a2e"></i></div></div>`).join("");
 
     chart("pareto", { data: { labels: res.pareto.map(p => p.name), datasets: [
       { type: "bar", label: "Cost", data: res.pareto.map(p => p.value), backgroundColor: res.pareto.map(p => F.WASTES[p.key].color), yAxisID: "y" },
@@ -48,8 +48,8 @@
       options: { plugins: { legend: { labels: { boxWidth: 10, font: { size: 10 } } }, tooltip: { callbacks: { title: i => res.steps[i[0].dataIndex].name } } }, scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: money } } } } });
 
     chart("cpk", { type: "bar", data: { labels: res.steps.map(s => s.id), datasets: [
-      { label: "Cpk", data: res.steps.map(s => s.cpk), backgroundColor: res.steps.map(s => s.cpk >= 1.33 ? "#46c37b" : s.cpk >= 1 ? "#f2a33a" : "#e5484d") },
-      { type: "line", label: "Target 1.33", data: res.steps.map(() => 1.33), borderColor: "#8b94a3", borderDash: [5, 5], pointRadius: 0 } ] },
+      { label: "Cpk", data: res.steps.map(s => s.cpk), backgroundColor: res.steps.map(s => s.cpk >= 1.33 ? "#2f6b55" : s.cpk >= 1 ? "#c08a2e" : "#9c341f") },
+      { type: "line", label: "Target 1.33", data: res.steps.map(() => 1.33), borderColor: "#7a7268", borderDash: [5, 5], pointRadius: 0 } ] },
       options: { plugins: { legend: { display: false }, tooltip: { callbacks: { title: i => res.steps[i[0].dataIndex].name + " — " + res.steps[i[0].dataIndex].spec.param } } } } });
 
     $("recs").innerHTML = res.recommendations.map(r => `<div class="rec"><b>${F.WASTES[r.waste].name}</b><span class="tag">${r.phase} · ${r.step}</span><div>${r.text}</div></div>`).join("");
@@ -245,7 +245,7 @@
   const NICE = s => String(s ?? "—").replace(/_/g, " ");
   $("diagnosePhotos").onclick = async () => {
     $("diagnosePhotos").disabled = true; $("photoStatus").textContent = "";
-    $("photoResult").innerHTML = `<p class="reading">Drex is reading the photo…</p>`; showAnswer();
+    $("photoResult").innerHTML = `<p class="drex-reading">Drex is reading the photo…</p>`; showAnswer();
     try {
       const r = await fetch("api/photo", { method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ images: photos.map(p => p.dataUrl), step: $("photoStep").value, note: $("photoNote").value }) });
@@ -262,19 +262,46 @@
         : e.message; }
     } finally { $("diagnosePhotos").disabled = !photos.length; }
   };
+  // Plain-English names for Drex's option keys.
+  const SAY = {
+    wafer_or_die: "Wafer or die", package_or_bond: "Package or bonds", spc_or_data: "Chart or data", wip_or_queue: "Lots waiting",
+    floor_or_layout: "Floor layout", equipment: "Equipment", other: "Something else",
+    none: "No defect", particle_contamination: "Particles", scratch_or_handling: "Scratch", pattern_or_litho: "Pattern defect",
+    crack_or_chipping: "Crack or chip", bond_defect: "Bond defect", void_or_delamination: "Void", corrosion_or_discoloration: "Corrosion",
+    transportation: "Transportation", inventory: "Inventory", motion: "Motion", waiting: "Waiting", overprocessing: "Over-processing",
+    overproduction: "Over-production", defects: "Defects", skills: "Unused skills",
+    conwip_dbr: "CONWIP pacing", recenter_spc: "Re-center + SPC", doe_variation: "DOE on variation", root_cause_8d: "8D root cause",
+    sampling_plan: "Sampling plan", standard_work: "Standard work", relayout_amhs: "Re-route moves",
+    release: "Release", hold: "Hold", rework: "Rework",
+  };
+  const say = v => SAY[v] || NICE(v);
+  const pct = c => c == null ? "" : `${Math.round(c * 100)}%`;
+
   function renderPhoto(o, note = "") {
-      const card = (label, key, extra = "") => {
-        const c = o.confidence[key], v = o.answers[key], desc = o.labels[key]?.[v];
-        return `<div class="kpi"><div class="l">${label}</div><div class="v">${esc(NICE(v))}</div>${desc ? `<div class="d">${esc(desc)}</div>` : ""}${extra}
-          ${c != null ? `<div class="conf" title="Confidence ${(c * 100).toFixed(0)}%"><i style="width:${c * 100}%"></i></div><div class="d">${(c * 100).toFixed(0)}% confident</div>` : ""}</div>`;
-      };
-      const low = Object.values(o.confidence).some(c => c != null && c < 0.5);
-      $("photoResult").innerHTML = `<div class="verdict">
-          ${card("What it shows", "subject")}${card("Defect type", "defect_type")}${card("Lean waste", "root_waste")}
-          ${card("Countermeasure", "countermeasure")}${card("Lots", "disposition")}${card("Severity", "severity")}</div>
-        <p class="sub" style="margin-top:10px">${esc(o.model)} · ${o.latencyMs} ms · ${o.inputTokens} tokens · $${o.costUsd.toFixed(6)}</p>
-        ${low ? `<p style="color:var(--warn)">⚠ Drex is unsure about at least one answer. Send these photos to an engineer for review.</p>` : ""}${note}
-        ${o.fallback === "claude" ? `<p class="recnote">⚠ Drex wasn’t reachable from this network, so ${esc(o.model)} answered the same questions as a fallback. Drex returns per-answer confidence; this fallback doesn’t.</p>` : ""}`;
+    const a = o.answers, c = o.confidence || {};
+    const defect = a.defect_type && a.defect_type !== "none";
+    const act = { release: "Release the lots.", hold: "Hold the lots for review.", rework: "Rework the lots." }[a.disposition] || "";
+    const headline = defect ? `${say(a.defect_type)} found.` : "No defect in sight.";
+    const wasteSure = c.root_waste == null || c.root_waste >= 0.5;
+    const sub = defect ? `${act} Run ${say(a.countermeasure)}.`
+                       : wasteSure ? `${act} The waste here is ${say(a.root_waste).toLowerCase()}: run ${say(a.countermeasure)}.` : `${act} Drex can’t name a waste with confidence.`;
+    const sev = a.severity ? `<span class="sev sev-${String(a.severity).toLowerCase()}">${esc(a.severity)} severity</span>` : "";
+    const lowKeys = Object.entries(c).filter(([, v]) => v != null && v < 0.5).map(([k]) => ({ subject: "what it shows", defect_type: "defect", root_waste: "waste", countermeasure: "fix", disposition: "lots", severity: "severity" }[k] || k));
+    const row = (label, key) => `<div class="fact"><span class="fl">${label}</span><span class="fv">${esc(key === "severity" ? a[key] : say(a[key]))}</span>
+        ${c[key] != null ? `<span class="fc"><i style="width:${c[key] * 100}%"></i></span><span class="fp${c[key] < 0.5 ? " low" : ""}">${pct(c[key])}</span>` : `<span></span><span></span>`}</div>`;
+    $("photoResult").innerHTML = `
+      <div class="call-card${defect ? " bad" : " good"}">
+        <div class="call-top"><span class="call-k">Drex’s call</span>${sev}</div>
+        <p class="call-h">${esc(headline)}</p>
+        <p class="call-s">${esc(sub)}</p>
+      </div>
+      <div class="facts">
+        ${row("What it shows", "subject")}${row("Defect", "defect_type")}${row("Lean waste", "root_waste")}
+        ${row("Fix", "countermeasure")}${row("Lots", "disposition")}${row("Severity", "severity")}
+      </div>
+      <p class="call-meta">${esc(o.model)} · ${o.latencyMs} ms · $${o.costUsd.toFixed(5)}</p>
+      ${lowKeys.length ? `<p class="call-warn">Unsure about ${esc(lowKeys.join(", "))}. An engineer should look before anyone acts on those.</p>` : ""}${note}
+      ${o.fallback === "claude" ? `<p class="recnote">Drex wasn’t reachable from this network, so ${esc(o.model)} answered the same questions as a fallback. It doesn’t return confidence.</p>` : ""}`;
   }
 
   // ---------- Arena (benchmark results) ----------
