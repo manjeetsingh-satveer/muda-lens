@@ -39,7 +39,50 @@ const PHOTO_QUESTIONS = {
   severity: { type: "score", instructions: "How severe is the problem shown for product quality or line output?", criteria: ["Low", "Medium", "High", "Critical"] },
 };
 
-async function diagnosePhoto({ images, note = "", step = "" }) {
+// Fallback when the Drex API can't be reached (e.g. a venue network blocked by its firewall):
+// the same questions and options, answered by Claude's vision model, labelled as such.
+async function claudePhoto({ state, images }) {
+  const Anthropic = require("@anthropic-ai/sdk");
+  const client = new (Anthropic.default || Anthropic)();
+  const model = process.env.CLAUDE_MODEL || "claude-opus-5-5";
+  const props = Object.fromEntries(Object.entries(PHOTO_QUESTIONS).map(([k, q]) =>
+    [k, { type: "string", enum: q.type === "score" ? q.criteria : Object.keys(q.criteria) }]));
+  const qs = Object.entries(PHOTO_QUESTIONS).map(([k, q]) => `${k}: ${q.instructions}\n` +
+    (q.type === "score" ? `  levels: ${q.criteria.join(", ")}` : Object.entries(q.criteria).map(([o, d]) => `  - ${o}: ${d}`).join("\n"))).join("\n\n");
+  const content = [
+    ...images.map(d => { const [, mt, data] = d.match(/^data:(image\/[a-z]+);base64,(.*)$/); return { type: "image", source: { type: "base64", media_type: mt, data } }; }),
+    { type: "text", text: `You are a Lean Six Sigma black belt in a semiconductor fab. The images above are Image 1..${images.length}.\nContext: ${JSON.stringify(state)}\nAnswer each question with exactly one option.\n\n${qs}` },
+  ];
+  const t0 = Date.now();
+  const msg = await client.beta.messages.create({
+    model, max_tokens: 16000, betas: ["server-side-fallback-2026-07-01"], fallbacks: "default",
+    output_config: { effort: "low", format: { type: "json_schema", schema: { type: "object", additionalProperties: false, required: Object.keys(props), properties: props } } },
+    messages: [{ role: "user", content }],
+  });
+  if (msg.stop_reason === "refusal") throw new Error("Claude declined to answer.");
+  const answers = JSON.parse(msg.content.filter(b => b.type === "text").map(b => b.text).join(""));
+  const u = msg.usage;
+  return { answers, confidence: {}, model, latencyMs: Date.now() - t0, inputTokens: u.input_tokens,
+           costUsd: (u.input_tokens * 4 + u.output_tokens * 20) / 1e6 };
+}
+
+async function diagnosePhoto(input) {
+  try { return await diagnosePhotoDrex(input); }
+  catch (e) {
+    const unreachable = /HTTP (403|429|5\d\d)|firewall|fetch failed|ECONN|ENOTFOUND|ETIMEDOUT/i.test(e.message);
+    const canClaude = !!(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
+    if (!unreachable || !canClaude) throw e;
+    const { images, note = "", step = "" } = input;
+    const st = F.STEPS.find(s => s.id === step);
+    const state = { process_step: st ? st.name : "not specified", engineer_note: String(note).slice(0, 2000) || "none",
+                    plant_rule: "Product-quality risk outranks flow waste. If no product defect is visible, judge the flow waste shown." };
+    const r = await claudePhoto({ state, images });
+    return { ...r, fallback: "claude", fallbackReason: "Drex API unreachable from this network",
+             labels: Object.fromEntries(Object.entries(PHOTO_QUESTIONS).map(([k, q]) => [k, q.type === "score" ? null : q.criteria])) };
+  }
+}
+
+async function diagnosePhotoDrex({ images, note = "", step = "" }) {
   if (!Array.isArray(images) || !images.length) throw new Error("Add at least one photo.");
   if (images.length > 8) throw new Error("Drex reads up to 8 photos at a time.");
   if (!images.every(s => typeof s === "string" && /^data:image\/(png|jpeg|webp);base64,/.test(s)))

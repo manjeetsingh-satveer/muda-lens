@@ -86,9 +86,13 @@
     try {
       const r = await fetch("api/decide", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rows, contenders }) });
       if (!r.ok) throw new Error("Server returned " + r.status + ". Start it with `npm start`.");
-      const out = await r.json();
+      let out = await r.json(), note = "";
+      if (out.drex?.error && /firewall|HTTP (403|429|5)/i.test(out.drex.error) && !contenders.includes("claude")) {
+        const r2 = await fetch("api/decide", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rows, contenders: ["claude", "rules"] }) });
+        if (r2.ok) { const o2 = await r2.json(); if (o2.claude?.answers) { out = { ...out, ...o2 }; note = `<p class="recnote">⚠ Drex wasn’t reachable from this network, so the frontier LLM and rules answered as a fallback.</p>`; } }
+      }
       if (out.drex?.error && !out.claude?.answers) throw new Error(out.drex.error);
-      renderDecide(out);
+      renderDecide(out, note);
       $("drexStatus").textContent = "";
     } catch (e) {
       const rec = RECORDED.line?.[$("scenario").value];
@@ -247,7 +251,8 @@
           ${card("What it shows", "subject")}${card("Defect type", "defect_type")}${card("Lean waste", "root_waste")}
           ${card("Countermeasure", "countermeasure")}${card("Lots", "disposition")}${card("Severity", "severity")}</div>
         <p class="sub" style="margin-top:10px">${esc(o.model)} · ${o.latencyMs} ms · ${o.inputTokens} tokens · $${o.costUsd.toFixed(6)}</p>
-        ${low ? `<p style="color:var(--warn)">⚠ Drex is unsure about at least one answer. Send these photos to an engineer for review.</p>` : ""}${note}`;
+        ${low ? `<p style="color:var(--warn)">⚠ Drex is unsure about at least one answer. Send these photos to an engineer for review.</p>` : ""}${note}
+        ${o.fallback === "claude" ? `<p class="recnote">⚠ Drex wasn’t reachable from this network, so ${esc(o.model)} answered the same questions as a fallback. Drex returns per-answer confidence; this fallback doesn’t.</p>` : ""}`;
   }
 
   // ---------- Arena (benchmark results) ----------
