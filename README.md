@@ -33,10 +33,10 @@ A case counts as correct only if **all 4 decisions** are right. The same data an
 | Contender | All-4 correct | $ / 1k decisions | p50 latency |
 |---|---|---|---|
 | Rule-based SPC (no AI) | 67.1% | $0 | <1 ms |
-| Drex | run `npm run bench` | | |
+| **Drex (drex-max-v1.1)** | **74.3%** | **$0.27** | 429 ms |
 | Claude Opus 5.5 | run `npm run bench` | | |
 
-The rules engine falls for the decoys. It gets only 3/10 mean-shift and 1/10 variance cases right, so a decision model has room to win.
+Drex gets 17/20 parameter-drift and variation cases right; the rules engine gets 4/20 because it falls for the decoys. Drex is weaker on transport (5/10) and over-inspection (6/10), which is the next thing to improve.
 
 ## Run it
 

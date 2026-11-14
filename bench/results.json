@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-14T19:44:03.073Z",
+  "generatedAt": "2026-11-14T19:50:45.279Z",
   "cases": 70,
   "questions": [
     "root_waste",
@@ -9,8 +9,1732 @@
   ],
   "contenders": {
     "drex": {
-      "label": "Drex (drex-v2.0)",
-      "skipped": true
+      "label": "Drex (drex-max-v1.1)",
+      "errors": 0,
+      "exact": 0.7428571428571429,
+      "perQuestion": {
+        "root_waste": 0.8571428571428571,
+        "culprit_step": 0.8857142857142857,
+        "countermeasure": 0.9428571428571428,
+        "disposition": 0.9142857142857143
+      },
+      "byKind": {
+        "bottleneck": {
+          "n": 10,
+          "exact": 9
+        },
+        "mean_shift": {
+          "n": 10,
+          "exact": 8
+        },
+        "variance": {
+          "n": 10,
+          "exact": 9
+        },
+        "defect_spike": {
+          "n": 10,
+          "exact": 7
+        },
+        "over_inspect": {
+          "n": 10,
+          "exact": 6
+        },
+        "manual_override": {
+          "n": 10,
+          "exact": 8
+        },
+        "transport": {
+          "n": 10,
+          "exact": 5
+        }
+      },
+      "latencyMsP50": 429,
+      "latencyMsP90": 673,
+      "costPer1kDecisionsUsd": 0.26865514285714287,
+      "avgInputTokens": 4478,
+      "sampleErrors": [],
+      "runs": [
+        {
+          "id": "case-001",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "culprit_step": "OX",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.835852507027402,
+            "culprit_step": 0.9394482417319638,
+            "countermeasure": 0.9104562109737876,
+            "disposition": 0.9264305051497354
+          },
+          "latencyMs": 834,
+          "costUsd": 0.0002688
+        },
+        {
+          "id": "case-002",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "WB"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "WB",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.8759080446684606,
+            "culprit_step": 0.8385085315939896,
+            "countermeasure": 0.76188467849955,
+            "disposition": 0.925595708706951
+          },
+          "latencyMs": 483,
+          "costUsd": 0.00026843999999999994
+        },
+        {
+          "id": "case-003",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "MT"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "MT",
+            "countermeasure": "doe_variation",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.7052070503171652,
+            "culprit_step": 0.8232591985112391,
+            "countermeasure": 0.8367215848617835,
+            "disposition": 0.9028237618821533
+          },
+          "latencyMs": 431,
+          "costUsd": 0.00026826
+        },
+        {
+          "id": "case-004",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "IM"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "IM",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework"
+          },
+          "confidence": {
+            "root_waste": 0.8271864327863903,
+            "culprit_step": 0.9282284630139229,
+            "countermeasure": 0.8938266425807398,
+            "disposition": 0.7375959406556816
+          },
+          "latencyMs": 791,
+          "costUsd": 0.00026862
+        },
+        {
+          "id": "case-005",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "WB"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "culprit_step": "DC",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.7002745976208379,
+            "culprit_step": 0.7067864378210895,
+            "countermeasure": 0.7030481366177854,
+            "disposition": 0.8558453942757945
+          },
+          "latencyMs": 883,
+          "costUsd": 0.0002688
+        },
+        {
+          "id": "case-006",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "IM"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "culprit_step": "IM",
+            "countermeasure": "standard_work",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.766389673303278,
+            "culprit_step": 0.5642189936843732,
+            "countermeasure": 0.8585387250770896,
+            "disposition": 0.7986190391627273
+          },
+          "latencyMs": 361,
+          "costUsd": 0.00026843999999999994
+        },
+        {
+          "id": "case-007",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "WS"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "culprit_step": "WS",
+            "countermeasure": "relayout_amhs",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.61053138694211,
+            "culprit_step": 0.32087014973658345,
+            "countermeasure": 0.511958102012114,
+            "disposition": 0.39498015612245535
+          },
+          "latencyMs": 484,
+          "costUsd": 0.00026856
+        },
+        {
+          "id": "case-008",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "FT"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "culprit_step": "FT",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.7962609247009074,
+            "culprit_step": 0.8168116909969347,
+            "countermeasure": 0.6404640061890433,
+            "disposition": 0.8907832347775021
+          },
+          "latencyMs": 514,
+          "costUsd": 0.00026916
+        },
+        {
+          "id": "case-009",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "MT"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "MT",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.8736418551594857,
+            "culprit_step": 0.8366315127679546,
+            "countermeasure": 0.8461405133158636,
+            "disposition": 0.9207422091259645
+          },
+          "latencyMs": 505,
+          "costUsd": 0.0002688
+        },
+        {
+          "id": "case-010",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "MT"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "MT",
+            "countermeasure": "doe_variation",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.8070317212646351,
+            "culprit_step": 0.8485642363967894,
+            "countermeasure": 0.8356768038853855,
+            "disposition": 0.7777713083971809
+          },
+          "latencyMs": 327,
+          "costUsd": 0.00026886
+        },
+        {
+          "id": "case-011",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "PH"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "PH",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework"
+          },
+          "confidence": {
+            "root_waste": 0.9018102717867523,
+            "culprit_step": 0.8860219457215108,
+            "countermeasure": 0.8584101302691415,
+            "disposition": 0.3125596778710132
+          },
+          "latencyMs": 308,
+          "costUsd": 0.00026856
+        },
+        {
+          "id": "case-012",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "culprit_step": "FT",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.36468251828946824,
+            "culprit_step": 0.5493086284743077,
+            "countermeasure": 0.4818048095215342,
+            "disposition": 0.7791834341612752
+          },
+          "latencyMs": 471,
+          "costUsd": 0.00026886
+        },
+        {
+          "id": "case-013",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "culprit_step": "OX",
+            "countermeasure": "standard_work",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.833369551637616,
+            "culprit_step": 0.7174080474612077,
+            "countermeasure": 0.8035818451458963,
+            "disposition": 0.6847556873588103
+          },
+          "latencyMs": 347,
+          "costUsd": 0.00026856
+        },
+        {
+          "id": "case-014",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "DA"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "culprit_step": "FT",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.5777625044326571,
+            "culprit_step": 0.38265474131258326,
+            "countermeasure": 0.3932460115234376,
+            "disposition": 0.7153441513666834
+          },
+          "latencyMs": 361,
+          "costUsd": 0.00026868
+        },
+        {
+          "id": "case-015",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "PH"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "culprit_step": "PH",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.8042719450952508,
+            "culprit_step": 0.8639455516301394,
+            "countermeasure": 0.7284652346898117,
+            "disposition": 0.7859676610645397
+          },
+          "latencyMs": 637,
+          "costUsd": 0.00026916
+        },
+        {
+          "id": "case-016",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "MD",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.8029115473813727,
+            "culprit_step": 0.852923630315808,
+            "countermeasure": 0.7487847323540748,
+            "disposition": 0.9326580664869039
+          },
+          "latencyMs": 429,
+          "costUsd": 0.00026832
+        },
+        {
+          "id": "case-017",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "IM"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "IM",
+            "countermeasure": "doe_variation",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.8084497637836682,
+            "culprit_step": 0.8959007522054646,
+            "countermeasure": 0.8574307581661237,
+            "disposition": 0.9249824087596239
+          },
+          "latencyMs": 437,
+          "costUsd": 0.00026868
+        },
+        {
+          "id": "case-018",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "WB"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "WB",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework"
+          },
+          "confidence": {
+            "root_waste": 0.8204828904313548,
+            "culprit_step": 0.8283668992142067,
+            "countermeasure": 0.8517423659020522,
+            "disposition": 0.5569106121131078
+          },
+          "latencyMs": 390,
+          "costUsd": 0.00026832
+        },
+        {
+          "id": "case-019",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "culprit_step": "DF",
+            "countermeasure": "sampling_plan",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.7420040057239469,
+            "culprit_step": 0.5996668147757429,
+            "countermeasure": 0.6695061441044685,
+            "disposition": 0.7961628050755617
+          },
+          "latencyMs": 369,
+          "costUsd": 0.00026868
+        },
+        {
+          "id": "case-020",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "DF"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "culprit_step": "DF",
+            "countermeasure": "standard_work",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.6985918163807157,
+            "culprit_step": 0.5991169015907426,
+            "countermeasure": 0.8013374552503421,
+            "disposition": 0.6642757984415241
+          },
+          "latencyMs": 693,
+          "costUsd": 0.00026862
+        },
+        {
+          "id": "case-021",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "PH"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "culprit_step": "PH",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.4594843851616068,
+            "culprit_step": 0.39723217760105395,
+            "countermeasure": 0.4958339397096791,
+            "disposition": 0.8918135179021419
+          },
+          "latencyMs": 332,
+          "costUsd": 0.00026891999999999997
+        },
+        {
+          "id": "case-022",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "culprit_step": "MD",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.6867019743204272,
+            "culprit_step": 0.7617028964002789,
+            "countermeasure": 0.7207283435498969,
+            "disposition": 0.7864063403126741
+          },
+          "latencyMs": 504,
+          "costUsd": 0.00026922
+        },
+        {
+          "id": "case-023",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "culprit_step": "MD",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.39582396506792034,
+            "culprit_step": 0.594854240380087,
+            "countermeasure": 0.5972905621465482,
+            "disposition": 0.9411377130777285
+          },
+          "latencyMs": 729,
+          "costUsd": 0.00026843999999999994
+        },
+        {
+          "id": "case-024",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "DA"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "DA",
+            "countermeasure": "doe_variation",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.8859484732727927,
+            "culprit_step": 0.8132883279743662,
+            "countermeasure": 0.8438651839107141,
+            "disposition": 0.8202940080961357
+          },
+          "latencyMs": 541,
+          "costUsd": 0.00026849999999999997
+        },
+        {
+          "id": "case-025",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "MD",
+            "countermeasure": "root_cause_8d",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.942594269609973,
+            "culprit_step": 0.9544672572431302,
+            "countermeasure": 0.9219346420433177,
+            "disposition": 0.5146169860175128
+          },
+          "latencyMs": 499,
+          "costUsd": 0.00026891999999999997
+        },
+        {
+          "id": "case-026",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "ET"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "culprit_step": "ET",
+            "countermeasure": "sampling_plan",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.7245270176030045,
+            "culprit_step": 0.5556851322864859,
+            "countermeasure": 0.6931851818544996,
+            "disposition": 0.20773669561762528
+          },
+          "latencyMs": 417,
+          "costUsd": 0.00026874
+        },
+        {
+          "id": "case-027",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "culprit_step": "MD",
+            "countermeasure": "standard_work",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.8529585878477902,
+            "culprit_step": 0.7165258767885269,
+            "countermeasure": 0.8010381293059387,
+            "disposition": 0.5636845411869819
+          },
+          "latencyMs": 557,
+          "costUsd": 0.00026843999999999994
+        },
+        {
+          "id": "case-028",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "DF"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "culprit_step": "DF",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.7047756200924686,
+            "culprit_step": 0.6264408174350519,
+            "countermeasure": 0.6965322987767084,
+            "disposition": 0.49852143597829035
+          },
+          "latencyMs": 351,
+          "costUsd": 0.00026856
+        },
+        {
+          "id": "case-029",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "ET"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "culprit_step": "DC",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.4203507415740178,
+            "culprit_step": 0.371695193443771,
+            "countermeasure": 0.3944700530308158,
+            "disposition": 0.764126263945589
+          },
+          "latencyMs": 343,
+          "costUsd": 0.00026862
+        },
+        {
+          "id": "case-030",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "MT"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "MT",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.7415617900629791,
+            "culprit_step": 0.7937450443480386,
+            "countermeasure": 0.8248866604389524,
+            "disposition": 0.9001076128303741
+          },
+          "latencyMs": 444,
+          "costUsd": 0.0002688
+        },
+        {
+          "id": "case-031",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "OX"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "culprit_step": "OX",
+            "countermeasure": "doe_variation",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.38267366170062955,
+            "culprit_step": 0.40615155066766195,
+            "countermeasure": 0.6830959985878158,
+            "disposition": 0.7221784132217438
+          },
+          "latencyMs": 600,
+          "costUsd": 0.00026796000000000003
+        },
+        {
+          "id": "case-032",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "ET"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "culprit_step": "FT",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework"
+          },
+          "confidence": {
+            "root_waste": 0.4749513183883462,
+            "culprit_step": 0.6064836071290807,
+            "countermeasure": 0.42006659413817793,
+            "disposition": 0.1012496411614174
+          },
+          "latencyMs": 495,
+          "costUsd": 0.00026832
+        },
+        {
+          "id": "case-033",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "culprit_step": "MD",
+            "countermeasure": "sampling_plan",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.9068512823691312,
+            "culprit_step": 0.8697074800556179,
+            "countermeasure": 0.8473975280471513,
+            "disposition": 0.7990085515644817
+          },
+          "latencyMs": 320,
+          "costUsd": 0.00026856
+        },
+        {
+          "id": "case-034",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "PH"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "culprit_step": "PH",
+            "countermeasure": "standard_work",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.5460266961096011,
+            "culprit_step": 0.6775819520227879,
+            "countermeasure": 0.7376213008845703,
+            "disposition": 0.3257445883374436
+          },
+          "latencyMs": 390,
+          "costUsd": 0.00026849999999999997
+        },
+        {
+          "id": "case-035",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "IM"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "culprit_step": "DF",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.5833730778794388,
+            "culprit_step": 0.6206364238732865,
+            "countermeasure": 0.5626740294301924,
+            "disposition": 0.7961628050755617
+          },
+          "latencyMs": 356,
+          "costUsd": 0.00026874
+        },
+        {
+          "id": "case-036",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "FT"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "culprit_step": "FT",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.8591594931678103,
+            "culprit_step": 0.920521167366564,
+            "countermeasure": 0.7927673862198595,
+            "disposition": 0.9402708132456569
+          },
+          "latencyMs": 291,
+          "costUsd": 0.00026916
+        },
+        {
+          "id": "case-037",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "OX"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "culprit_step": "DC",
+            "countermeasure": "sampling_plan",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.6607694131887027,
+            "culprit_step": 0.4850916816890179,
+            "countermeasure": 0.5800809184204813,
+            "disposition": 0.6606006358273019
+          },
+          "latencyMs": 418,
+          "costUsd": 0.00026886
+        },
+        {
+          "id": "case-038",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "ET"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "ET",
+            "countermeasure": "doe_variation",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.6788213783143467,
+            "culprit_step": 0.7916521933502819,
+            "countermeasure": 0.7914632576947519,
+            "disposition": 0.895164976978041
+          },
+          "latencyMs": 350,
+          "costUsd": 0.0002688
+        },
+        {
+          "id": "case-039",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "MT"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "MT",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework"
+          },
+          "confidence": {
+            "root_waste": 0.9457517699317041,
+            "culprit_step": 0.931364237812101,
+            "countermeasure": 0.9664702331549772,
+            "disposition": 0.7040024550260028
+          },
+          "latencyMs": 444,
+          "costUsd": 0.0002688
+        },
+        {
+          "id": "case-040",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "DF"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "culprit_step": "DF",
+            "countermeasure": "sampling_plan",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.8573267990218196,
+            "culprit_step": 0.8125814248626531,
+            "countermeasure": 0.7090005446125983,
+            "disposition": 0.7387720730956224
+          },
+          "latencyMs": 429,
+          "costUsd": 0.00026886
+        },
+        {
+          "id": "case-041",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "culprit_step": "OX",
+            "countermeasure": "standard_work",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.7149340066495561,
+            "culprit_step": 0.5980650029672565,
+            "countermeasure": 0.7422687948098888,
+            "disposition": 0.6690745951010689
+          },
+          "latencyMs": 341,
+          "costUsd": 0.00026838000000000003
+        },
+        {
+          "id": "case-042",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "MT"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "culprit_step": "MT",
+            "countermeasure": "relayout_amhs",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.38656621543705133,
+            "culprit_step": 0.5663065017451527,
+            "countermeasure": 0.36263663190737516,
+            "disposition": 0.5417586111760345
+          },
+          "latencyMs": 387,
+          "costUsd": 0.00026814
+        },
+        {
+          "id": "case-043",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "PH"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "culprit_step": "PH",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.6662973826328348,
+            "culprit_step": 0.732398788626403,
+            "countermeasure": 0.5619169748874019,
+            "disposition": 0.4279332808848467
+          },
+          "latencyMs": 333,
+          "costUsd": 0.00026843999999999994
+        },
+        {
+          "id": "case-044",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "PH"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "PH",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.6512238783767023,
+            "culprit_step": 0.8852206994765371,
+            "countermeasure": 0.8324253264641926,
+            "disposition": 0.8465275789546363
+          },
+          "latencyMs": 529,
+          "costUsd": 0.00026856
+        },
+        {
+          "id": "case-045",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "DC"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "DC",
+            "countermeasure": "doe_variation",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.8777941013116211,
+            "culprit_step": 0.8340441259050666,
+            "countermeasure": 0.9405104638907663,
+            "disposition": 0.9032989499986798
+          },
+          "latencyMs": 620,
+          "costUsd": 0.00026832
+        },
+        {
+          "id": "case-046",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "DF"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "DF",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework"
+          },
+          "confidence": {
+            "root_waste": 0.8949624632416459,
+            "culprit_step": 0.9215102214020405,
+            "countermeasure": 0.9344525313548213,
+            "disposition": 0.7617345970352113
+          },
+          "latencyMs": 566,
+          "costUsd": 0.00026862
+        },
+        {
+          "id": "case-047",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "WS"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "culprit_step": "WS",
+            "countermeasure": "sampling_plan",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.8593002466720597,
+            "culprit_step": 0.8028869872386896,
+            "countermeasure": 0.7053740581298671,
+            "disposition": 0.8502793132228645
+          },
+          "latencyMs": 295,
+          "costUsd": 0.00026898
+        },
+        {
+          "id": "case-048",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "culprit_step": "OX",
+            "countermeasure": "standard_work",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.7557158382283371,
+            "culprit_step": 0.6837703873236334,
+            "countermeasure": 0.7669548813352955,
+            "disposition": 0.27456236079404495
+          },
+          "latencyMs": 323,
+          "costUsd": 0.00026891999999999997
+        },
+        {
+          "id": "case-049",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "ET"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "culprit_step": "ET",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.7771935432950502,
+            "culprit_step": 0.8154980797406272,
+            "countermeasure": 0.7650970401439722,
+            "disposition": 0.8473938421182623
+          },
+          "latencyMs": 407,
+          "costUsd": 0.00026849999999999997
+        },
+        {
+          "id": "case-050",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "DC"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "culprit_step": "DC",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.8789086461613659,
+            "culprit_step": 0.9219633216607611,
+            "countermeasure": 0.8600783858597665,
+            "disposition": 0.9203534695088856
+          },
+          "latencyMs": 332,
+          "costUsd": 0.0002688
+        },
+        {
+          "id": "case-051",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "DA"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "DA",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.9835460998645249,
+            "culprit_step": 0.9814352525274738,
+            "countermeasure": 0.9681921895006645,
+            "disposition": 0.9834732799156823
+          },
+          "latencyMs": 469,
+          "costUsd": 0.0002688
+        },
+        {
+          "id": "case-052",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "WB"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "WB",
+            "countermeasure": "doe_variation",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.9651815416630101,
+            "culprit_step": 0.9642064732743264,
+            "countermeasure": 0.962241985136786,
+            "disposition": 0.948246494000115
+          },
+          "latencyMs": 673,
+          "costUsd": 0.00026856
+        },
+        {
+          "id": "case-053",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "DF"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "DF",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework"
+          },
+          "confidence": {
+            "root_waste": 0.8555686116899883,
+            "culprit_step": 0.8179043999218383,
+            "countermeasure": 0.8490400082508102,
+            "disposition": 0.7649849919419922
+          },
+          "latencyMs": 1092,
+          "costUsd": 0.00026826
+        },
+        {
+          "id": "case-054",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "DF"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "culprit_step": "DF",
+            "countermeasure": "sampling_plan",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.8640075032332771,
+            "culprit_step": 0.7527559142805422,
+            "countermeasure": 0.7554694055753689,
+            "disposition": 0.9039606355518092
+          },
+          "latencyMs": 318,
+          "costUsd": 0.00026849999999999997
+        },
+        {
+          "id": "case-055",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "MT"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "culprit_step": "MT",
+            "countermeasure": "standard_work",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.5075484890227479,
+            "culprit_step": 0.4148329802699561,
+            "countermeasure": 0.6636919326583657,
+            "disposition": 0.6443582305054169
+          },
+          "latencyMs": 630,
+          "costUsd": 0.00026826
+        },
+        {
+          "id": "case-056",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "culprit_step": "OX",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.794239090880983,
+            "culprit_step": 0.7730196516529868,
+            "countermeasure": 0.7233820955217848,
+            "disposition": 0.8668438486715291
+          },
+          "latencyMs": 380,
+          "costUsd": 0.00026874
+        },
+        {
+          "id": "case-057",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "FT"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "culprit_step": "FT",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.8357059145649652,
+            "culprit_step": 0.780164680093523,
+            "countermeasure": 0.6725544951931272,
+            "disposition": 0.9018442667677202
+          },
+          "latencyMs": 501,
+          "costUsd": 0.00026862
+        },
+        {
+          "id": "case-058",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "DC"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "DC",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.9395447987774006,
+            "culprit_step": 0.9536294757460996,
+            "countermeasure": 0.9322248947134157,
+            "disposition": 0.9801758255661761
+          },
+          "latencyMs": 615,
+          "costUsd": 0.00026874
+        },
+        {
+          "id": "case-059",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "ET"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "ET",
+            "countermeasure": "doe_variation",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.7090899356918566,
+            "culprit_step": 0.8280108147655878,
+            "countermeasure": 0.8639254396763452,
+            "disposition": 0.8965926726242439
+          },
+          "latencyMs": 313,
+          "costUsd": 0.00026862
+        },
+        {
+          "id": "case-060",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "ET"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "ET",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework"
+          },
+          "confidence": {
+            "root_waste": 0.8464784712027965,
+            "culprit_step": 0.8708584121924698,
+            "countermeasure": 0.864454030336045,
+            "disposition": 0.630359649006408
+          },
+          "latencyMs": 520,
+          "costUsd": 0.00026886
+        },
+        {
+          "id": "case-061",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "FT"
+          },
+          "answers": {
+            "root_waste": "overprocessing",
+            "culprit_step": "FT",
+            "countermeasure": "sampling_plan",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.749467945249551,
+            "culprit_step": 0.7454166993830768,
+            "countermeasure": 0.6934963085014646,
+            "disposition": 0.8197592288076303
+          },
+          "latencyMs": 307,
+          "costUsd": 0.0002688
+        },
+        {
+          "id": "case-062",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "PH"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "culprit_step": "PH",
+            "countermeasure": "standard_work",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.5118974866679157,
+            "culprit_step": 0.6791473934277423,
+            "countermeasure": 0.7393912965274286,
+            "disposition": 0.7379325122732806
+          },
+          "latencyMs": 393,
+          "costUsd": 0.00026862
+        },
+        {
+          "id": "case-063",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "WB"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "culprit_step": "WB",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.8453976389822725,
+            "culprit_step": 0.7952662170209793,
+            "countermeasure": 0.8167367396517481,
+            "disposition": 0.6903340444757783
+          },
+          "latencyMs": 317,
+          "costUsd": 0.00026856
+        },
+        {
+          "id": "case-064",
+          "kind": "bottleneck",
+          "truth": {
+            "root_waste": "waiting",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release",
+            "culprit_step": "IM"
+          },
+          "answers": {
+            "root_waste": "waiting",
+            "culprit_step": "IM",
+            "countermeasure": "conwip_dbr",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.8008008842536636,
+            "culprit_step": 0.9424090611589855,
+            "countermeasure": 0.848523982198749,
+            "disposition": 0.8828881563250291
+          },
+          "latencyMs": 290,
+          "costUsd": 0.00026904
+        },
+        {
+          "id": "case-065",
+          "kind": "mean_shift",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold",
+            "culprit_step": "ET"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "ET",
+            "countermeasure": "recenter_spc",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.6522896422973569,
+            "culprit_step": 0.7182585618211839,
+            "countermeasure": 0.6336814915250712,
+            "disposition": 0.7249970823991119
+          },
+          "latencyMs": 367,
+          "costUsd": 0.00026849999999999997
+        },
+        {
+          "id": "case-066",
+          "kind": "variance",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "doe_variation",
+            "disposition": "hold",
+            "culprit_step": "DA"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "DA",
+            "countermeasure": "doe_variation",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.835964720739968,
+            "culprit_step": 0.811824492670868,
+            "countermeasure": 0.8527274069720575,
+            "disposition": 0.8116262696856126
+          },
+          "latencyMs": 383,
+          "costUsd": 0.0002688
+        },
+        {
+          "id": "case-067",
+          "kind": "defect_spike",
+          "truth": {
+            "root_waste": "defects",
+            "countermeasure": "root_cause_8d",
+            "disposition": "rework",
+            "culprit_step": "MD"
+          },
+          "answers": {
+            "root_waste": "defects",
+            "culprit_step": "MD",
+            "countermeasure": "root_cause_8d",
+            "disposition": "hold"
+          },
+          "confidence": {
+            "root_waste": 0.9029779257058238,
+            "culprit_step": 0.9300207601953385,
+            "countermeasure": 0.9253152185203252,
+            "disposition": 0.24885250767479186
+          },
+          "latencyMs": 354,
+          "costUsd": 0.00026922
+        },
+        {
+          "id": "case-068",
+          "kind": "over_inspect",
+          "truth": {
+            "root_waste": "overprocessing",
+            "countermeasure": "sampling_plan",
+            "disposition": "release",
+            "culprit_step": "OX"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "culprit_step": "OX",
+            "countermeasure": "sampling_plan",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.38229251257104346,
+            "culprit_step": 0.7003137565530276,
+            "countermeasure": 0.4608378790162899,
+            "disposition": 0.7401968970821463
+          },
+          "latencyMs": 386,
+          "costUsd": 0.00026862
+        },
+        {
+          "id": "case-069",
+          "kind": "manual_override",
+          "truth": {
+            "root_waste": "skills",
+            "countermeasure": "standard_work",
+            "disposition": "release",
+            "culprit_step": "DF"
+          },
+          "answers": {
+            "root_waste": "skills",
+            "culprit_step": "DF",
+            "countermeasure": "standard_work",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.7977302057950789,
+            "culprit_step": 0.6214785982816515,
+            "countermeasure": 0.8134349444928397,
+            "disposition": 0.7693008047559763
+          },
+          "latencyMs": 556,
+          "costUsd": 0.00026868
+        },
+        {
+          "id": "case-070",
+          "kind": "transport",
+          "truth": {
+            "root_waste": "transportation",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release",
+            "culprit_step": "DC"
+          },
+          "answers": {
+            "root_waste": "transportation",
+            "culprit_step": "DC",
+            "countermeasure": "relayout_amhs",
+            "disposition": "release"
+          },
+          "confidence": {
+            "root_waste": 0.7801301570653887,
+            "culprit_step": 0.7513018287921631,
+            "countermeasure": 0.6099463359609225,
+            "disposition": 0.6302014396544681
+          },
+          "latencyMs": 478,
+          "costUsd": 0.00026849999999999997
+        }
+      ]
     },
     "claude": {
       "label": "Claude (claude-opus-5-5)",
@@ -57,7 +1781,7 @@
         }
       },
       "latencyMsP50": 0,
-      "latencyMsP90": 0,
+      "latencyMsP90": 1,
       "costPer1kDecisionsUsd": 0,
       "avgInputTokens": 0,
       "sampleErrors": [],
@@ -77,7 +1801,7 @@
             "disposition": "release",
             "culprit_step": "OX"
           },
-          "latencyMs": 0,
+          "latencyMs": 1,
           "costUsd": 0
         },
         {
@@ -95,7 +1819,7 @@
             "disposition": "release",
             "culprit_step": "ET"
           },
-          "latencyMs": 0,
+          "latencyMs": 1,
           "costUsd": 0
         },
         {
@@ -185,7 +1909,7 @@
             "disposition": "release",
             "culprit_step": "WS"
           },
-          "latencyMs": 0,
+          "latencyMs": 1,
           "costUsd": 0
         },
         {
@@ -473,7 +2197,7 @@
             "disposition": "release",
             "culprit_step": "FT"
           },
-          "latencyMs": 0,
+          "latencyMs": 1,
           "costUsd": 0
         },
         {
@@ -851,7 +2575,7 @@
             "disposition": "release",
             "culprit_step": "OX"
           },
-          "latencyMs": 0,
+          "latencyMs": 1,
           "costUsd": 0
         },
         {
@@ -1049,7 +2773,7 @@
             "disposition": "release",
             "culprit_step": "MT"
           },
-          "latencyMs": 0,
+          "latencyMs": 2,
           "costUsd": 0
         },
         {
@@ -1139,7 +2863,7 @@
             "disposition": "rework",
             "culprit_step": "ET"
           },
-          "latencyMs": 1,
+          "latencyMs": 0,
           "costUsd": 0
         },
         {
@@ -1283,7 +3007,7 @@
             "disposition": "release",
             "culprit_step": "OX"
           },
-          "latencyMs": 0,
+          "latencyMs": 1,
           "costUsd": 0
         },
         {

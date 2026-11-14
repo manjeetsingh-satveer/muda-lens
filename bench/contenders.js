@@ -9,7 +9,7 @@ const { QUESTIONS } = require("./cases.js");
 //   POST {DREX_BASE_URL}{DREX_PATH}  { model, state, questions: { name: { type:"choice", instructions, criteria } } }
 //   -> { answers: { name: { choice, confidence, probabilities } }, usage: { input_tokens }, latency_ms }
 const drexCfg = () => ({
-  base: process.env.DREX_BASE_URL, key: process.env.DREX_API_KEY,
+  base: process.env.DREX_BASE_URL, key: process.env.DREX_API_KEY || process.env.NACE_API_KEY,
   model: process.env.DREX_MODEL || "drex-v2.0", path: process.env.DREX_PATH || "/v1/systemone",
   pricePerMTok: Number(process.env.DREX_PRICE_PER_MTOK || 0.06),
 });
@@ -24,7 +24,7 @@ async function drex(state) {
   const t0 = Date.now();
   const res = await fetch(c.base.replace(/\/$/, "") + c.path, {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...(c.key ? { Authorization: `Bearer ${c.key}` } : {}) },
+    headers: { "Content-Type": "application/json", "X-Nace-Client": "fab-muda-lens/1", ...(c.key ? { Authorization: `Bearer ${c.key}` } : {}) },
     body: JSON.stringify({ model: c.model, state, questions: drexQuestions() }),
   });
   if (!res.ok) throw new Error(`Drex HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
