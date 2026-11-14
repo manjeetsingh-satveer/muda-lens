@@ -90,7 +90,7 @@
   }
   $("askDrex").onclick = () => decide(["drex"]);
   $("askAll").onclick = () => decide(["drex", "claude", "rules"]);
-  fetch("api/status").then(r => r.json()).then(s => { $("drexStatus").textContent = s.drex ? `Connected: ${s.drex}` : "Drex not configured: set DREX_BASE_URL in .env"; }).catch(() => {});
+  fetch("api/status").then(r => r.json()).then(s => { $("drexStatus").textContent = s.drex ? `Connected: ${s.drex}` : "Drex not configured: set DREX_BASE_URL in .env"; }).catch(() => { const m = "Hosted demo: live Drex calls and photo diagnosis run on the team laptop (npm start). The arena below shows real Drex and Claude runs."; $("drexStatus").textContent = m; $("photoStatus").textContent = m; });
 
   // ---------- Photo diagnosis (Drex Max reads images) ----------
   const photos = []; // { name, dataUrl }
