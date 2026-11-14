@@ -18,7 +18,7 @@
     return `<span class="pill ${cls}">${fmt(v)}</span>`;
   };
 
-  Chart.defaults.color = "#8b94a3"; Chart.defaults.borderColor = "#262c36";
+  Chart.defaults.color = "#93a6a3"; Chart.defaults.borderColor = "#26363a"; Chart.defaults.font.family = "IBM Plex Sans, system-ui, sans-serif";
 
   function chart(id, cfg) { if (charts[id]) charts[id].destroy(); charts[id] = new Chart($(id), cfg); }
 
@@ -37,11 +37,11 @@
     const maxLead = Math.max(...res.steps.map(s => s.va + s.queue));
     $("vsm").innerHTML = res.steps.map(s => `<div class="box"><div class="n">${s.name}</div>
       VA ${(s.va / 60).toFixed(1)}h · Wait ${(s.queue / 60).toFixed(1)}h<br>PCE ${(s.pce * 100).toFixed(0)}%
-      <div class="bar" style="display:flex"><i style="width:${s.va / maxLead * 100}%;background:#4fd1c5"></i><i style="width:${s.queue / maxLead * 100}%;background:#f2a33a"></i></div></div>`).join("");
+      <div class="bar" style="display:flex"><i style="width:${s.va / maxLead * 100}%;background:#3fc1b0"></i><i style="width:${s.queue / maxLead * 100}%;background:#f2a33a"></i></div></div>`).join("");
 
     chart("pareto", { data: { labels: res.pareto.map(p => p.name), datasets: [
       { type: "bar", label: "Cost", data: res.pareto.map(p => p.value), backgroundColor: res.pareto.map(p => F.WASTES[p.key].color), yAxisID: "y" },
-      { type: "line", label: "Cumulative %", data: res.pareto.map(p => p.cum * 100), borderColor: "#e6e9ef", pointRadius: 3, yAxisID: "y1" } ] },
+      { type: "line", label: "Cumulative %", data: res.pareto.map(p => p.cum * 100), borderColor: "#e8edeb", pointRadius: 3, yAxisID: "y1" } ] },
       options: { plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: money } }, y1: { position: "right", min: 0, max: 100, grid: { display: false }, ticks: { callback: v => v + "%" } } } } });
 
     chart("stack", { type: "bar", data: { labels: res.steps.map(s => s.id), datasets: Object.entries(F.WASTES).map(([key, w]) => ({ label: w.name, data: res.steps.map(s => s.waste[key]), backgroundColor: w.color })) },

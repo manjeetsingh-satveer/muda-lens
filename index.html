@@ -4,15 +4,68 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Muda Lens</title>
+<meta name="description" content="Muda Lens: Drex finds the waste in a semiconductor line and decides the fix in 0.3 seconds.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
-  :root { --bg:#0e1116; --panel:#171b22; --line:#262c36; --ink:#e6e9ef; --mute:#8b94a3; --acc:#4fd1c5; --bad:#e5484d; --warn:#f2a33a; --good:#46c37b; }
+  /* Layout: sticky nav → pitch hero → problem / why now / how → photo → live line → proof. Dark graphite cleanroom; teal = value-add, amber = waste. */
+  :root { --bg:#0E1416; --bg2:#111A1C; --panel:#152024; --line:#26363A; --ink:#E8EDEB; --mute:#93A6A3; --acc:#3FC1B0; --bad:#E5484D; --warn:#F2A33A; --good:#46C37B;
+          --sans:'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; --mono:'JetBrains Mono', ui-monospace, Consolas, monospace; color-scheme:dark; }
   * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif; }
-  header { padding:20px 24px; border-bottom:1px solid var(--line); display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between; }
-  h1 { margin:0; font-size:20px; } h1 span { color:var(--acc); }
+  html { scroll-behavior:smooth; scroll-padding-top:72px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } .stat, .hero h1, .hero .lead { animation:none !important; } }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.55 var(--sans); }
+  a { color:var(--acc); }
+  h1, h2, h3 { text-wrap:balance; }
   .sub { color:var(--mute); font-size:13px; }
-  main { padding:20px 24px; max-width:1400px; margin:0 auto; }
+  .eyebrow { font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--acc); margin:0 0 10px; font-weight:600; }
+  .mute { color:var(--mute); } .amber { color:var(--warn) !important; }
+
+  .topnav { position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:12px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px)); background:#0E1416e6; backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
+  .brand { display:flex; align-items:center; gap:8px; color:var(--ink); text-decoration:none; font-size:18px; } .brand b { color:var(--acc); } .brand svg { color:var(--acc); }
+  .navlinks { display:flex; gap:18px; align-items:center; flex-wrap:wrap; } .navlinks a { color:var(--mute); text-decoration:none; font-size:14px; } .navlinks a:hover { color:var(--ink); }
+  .navlinks .gh { border:1px solid var(--line); padding:5px 12px; border-radius:99px; color:var(--ink); }
+  @media (max-width:640px) { .navlinks a:not(.gh) { display:none; } }
+
+  .hero { position:relative; overflow:hidden; border-bottom:1px solid var(--line);
+          background: radial-gradient(900px 420px at 85% -10%, #3FC1B02b, transparent 60%), radial-gradient(700px 380px at -10% 110%, #F2A33A1c, transparent 60%), var(--bg); }
+  .hero::before { content:""; position:absolute; inset:0; background-image: linear-gradient(#ffffff08 1px, transparent 1px), linear-gradient(90deg, #ffffff08 1px, transparent 1px); background-size:44px 44px; mask-image:linear-gradient(180deg, #000 40%, transparent); pointer-events:none; }
+  .hero-in, .band-in { position:relative; max-width:1200px; margin:0 auto; padding-block:64px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+  .hero h1 { font-size:clamp(40px, 6.4vw, 84px); line-height:1.02; letter-spacing:-.03em; margin:0 0 20px; font-weight:700; }
+  .hero h1 span { color:var(--acc); }
+  .lead { font-size:clamp(17px, 1.6vw, 20px); color:#C3D0CD; max-width:62ch; margin:0 0 28px; } .lead b { color:var(--ink); }
+  .cta { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:40px; }
+  .btn { display:inline-flex; align-items:center; gap:8px; padding:12px 20px; border-radius:10px; border:1px solid var(--line); color:var(--ink); text-decoration:none; font-weight:600; background:var(--panel); }
+  .btn.primary { background:var(--acc); color:#062320; border-color:var(--acc); } .btn:hover { filter:brightness(1.08); }
+  .stats { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px; }
+  @media (max-width:760px) { .stats { grid-template-columns:1fr; } }
+  .stat { background:#152024cc; border:1px solid var(--line); border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:6px; animation:rise .7s cubic-bezier(.2,.7,.2,1) both; }
+  .stat:nth-child(2) { animation-delay:.1s; } .stat:nth-child(3) { animation-delay:.2s; }
+  .stat .big { font-family:var(--mono); font-size:clamp(34px, 4vw, 48px); font-weight:600; color:var(--acc); line-height:1; font-variant-numeric:tabular-nums; }
+  .stat .lbl { font-size:14px; color:var(--ink); } .stat .lbl .mute { font-size:13px; }
+  @keyframes rise { from { opacity:.0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+
+  .band { background:var(--bg2); border-bottom:1px solid var(--line); }
+  h2.sect { font-size:clamp(26px, 3.2vw, 40px); line-height:1.12; letter-spacing:-.02em; margin:0 0 14px; } h2.sect em { font-style:normal; color:var(--warn); }
+  .narrow { max-width:70ch; }
+  .trio { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px; }
+  .tile { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px; }
+  .tile .k { font-family:var(--mono); font-size:12px; color:var(--warn); letter-spacing:.08em; text-transform:uppercase; }
+  .tile h3 { margin:8px 0 6px; font-size:19px; } .tile p { margin:0; color:var(--mute); font-size:14px; }
+  .steps { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px; }
+  .step { display:flex; gap:14px; align-items:flex-start; } .step h3 { margin:2px 0 4px; font-size:17px; } .step p { margin:0; color:var(--mute); font-size:14px; }
+  .step .n { flex:0 0 34px; height:34px; border-radius:50%; display:grid; place-items:center; font-family:var(--mono); font-weight:600; background:#3FC1B022; color:var(--acc); border:1px solid #3FC1B055; }
+  @media (max-width:860px) { .trio, .steps { grid-template-columns:1fr; } }
+
+  main { max-width:1200px; margin:0 auto; padding-block:40px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); display:flex; flex-direction:column; gap:16px; }
+  main > * { margin-top:0 !important; margin-bottom:0 !important; }
+  #photoCard { order:-2; border-color:#3FC1B055; background:linear-gradient(180deg, #3FC1B00f, transparent 140px), var(--panel); }
+  .demo-head { order:-1; display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; justify-content:space-between; padding-top:24px; }
+  .demo-head h2.sect { margin:0; }
+  .card.proof { border-color:#F2A33A55; }
+  footer { border-top:1px solid var(--line); color:var(--mute); font-size:13px; padding:28px max(16px, env(safe-area-inset-right, 0px)) 40px max(16px, env(safe-area-inset-left, 0px)); text-align:center; }
+  footer p { margin:4px 0; } footer b { color:var(--ink); }
   .controls { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
   button, select, input[type=number] { background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:8px 12px; font:inherit; }
   button { cursor:pointer; } button.primary { background:var(--acc); color:#06201d; border-color:var(--acc); font-weight:600; }
@@ -65,24 +118,68 @@
 </style>
 </head>
 <body>
-<header>
-  <div>
-    <h1><span>Muda</span> Lens</h1>
-    <div class="sub">Lean (TIMWOODS) + Six Sigma diagnosis of waste in a semiconductor wafer-to-package flow</div>
+<nav class="topnav">
+  <a class="brand" href="#top"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="10.5" cy="10.5" r="2.2" fill="#F2A33A"/></svg><b>Muda</b> Lens</a>
+  <div class="navlinks">
+    <a href="#why">Why now</a><a href="#photoCard">Photo</a><a href="#demo">Live line</a><a href="#proof">Proof</a>
+    <a class="gh" href="https://github.com/manjeetsingh-satveer/muda-lens" target="_blank" rel="noopener">GitHub ↗</a>
   </div>
-  <div class="controls">
-    <select id="scenario">
-      <option value="baseline">Scenario: Baseline fab</option>
-      <option value="litho">Scenario: Litho bottleneck + CD drift</option>
-      <option value="backend">Scenario: Wire-bond defect spike</option>
-      <option value="improved">Scenario: After kaizen (improved)</option>
-    </select>
-    <button class="primary" id="run">Run diagnosis</button>
-    <label class="file">Upload lot CSV <input type="file" id="csv" accept=".csv" hidden></label>
-    <button id="dl">Download sample CSV</button>
+</nav>
+
+<header class="hero" id="top">
+  <div class="hero-in">
+    <p class="eyebrow">Apex Predator track · Drex vs. the Giants</p>
+    <h1>Find the waste.<br><span>Decide the fix.</span><br>In 0.3 seconds.</h1>
+    <p class="lead">Muda Lens puts a Lean Six Sigma black belt on every lot in a semiconductor line. Feed it line data or a photo. <b>Drex</b> decides which waste, where it started, which fix to run, and whether the lots ship.</p>
+    <div class="cta">
+      <a class="btn primary" href="#photoCard">📷 Diagnose a photo</a>
+      <a class="btn" href="#proof">See the benchmark</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="big">94.3%</span><span class="lbl">all 4 decisions right on 70 test cases<br><span class="mute">Claude Opus 5.5: 92.9% · rules: 67.1%</span></span></div>
+      <div class="stat"><span class="big">8×</span><span class="lbl">faster than a frontier LLM<br><span class="mute">283 ms vs. 2,313 ms median</span></span></div>
+      <div class="stat"><span class="big amber">105×</span><span class="lbl">cheaper per decision<br><span class="mute">$0.16 vs. $17.18 per 1,000</span></span></div>
+    </div>
   </div>
 </header>
+
+<section class="band" id="why">
+  <div class="band-in">
+    <p class="eyebrow">The problem</p>
+    <h2 class="sect">A chip spends most of its life in a fab <em>waiting</em>.</h2>
+    <p class="lead narrow">In our model of a 12-step power-device line, only 12% of lead time is real work. The rest is muda: queues, holds, extra inspections, long moves. The data to catch it already exists. The judgment to act on it is scarce.</p>
+    <p class="eyebrow" style="margin-top:36px">Why now</p>
+    <div class="trio">
+      <div class="tile"><span class="k">01 · More fabs</span><h3>New lines must ramp fast</h3><p>Governments are funding new fabs in the US, Europe and Asia. Every new line has to get its yield up quickly.</p></div>
+      <div class="tile"><span class="k">02 · Fewer experts</span><h3>~67,000 short by 2030</h3><p>The projected US shortfall of semiconductor workers (SIA &amp; Oxford Economics, 2023). There aren’t enough black belts to go round.</p></div>
+      <div class="tile"><span class="k">03 · Cheap decisions</span><h3>A cent buys ~60 calls</h3><p>Decision models like Drex answer in ~0.3 s for $0.16 per 1,000. Expert judgment can now run on every lot.</p></div>
+    </div>
+    <p class="eyebrow" style="margin-top:36px">How it works</p>
+    <div class="steps">
+      <div class="step"><span class="n">1</span><div><h3>Line data or photos in</h3><p>Lot data from 12 process steps, or up to 8 photos of dies, bonds, charts or racks.</p></div></div>
+      <div class="step"><span class="n">2</span><div><h3>Lean + Six Sigma do the math</h3><p>Value stream, 8 wastes, DPMO, Cpk. Only real changes vs. normal go forward.</p></div></div>
+      <div class="step"><span class="n">3</span><div><h3>Drex makes the call</h3><p>Waste, culprit step, countermeasure, release / hold / rework, with confidence. Unsure? It asks an engineer.</p></div></div>
+    </div>
+  </div>
+</section>
 <main>
+  <section class="demo-head" id="demo">
+    <div>
+      <p class="eyebrow">Live line</p>
+      <h2 class="sect">Pick a scenario. Watch the waste show up.</h2>
+    </div>
+    <div class="controls">
+      <select id="scenario" aria-label="Scenario">
+        <option value="baseline">Scenario: Baseline fab</option>
+        <option value="litho">Scenario: Litho bottleneck + CD drift</option>
+        <option value="backend">Scenario: Wire-bond defect spike</option>
+        <option value="improved">Scenario: After kaizen (improved)</option>
+      </select>
+      <button class="primary" id="run">Run diagnosis</button>
+      <label class="file">Upload lot CSV <input type="file" id="csv" accept=".csv" hidden></label>
+      <button id="dl">Download sample CSV</button>
+    </div>
+  </section>
   <section class="grid kpis" id="kpis"></section>
 
   <section class="card" style="margin-bottom:16px">
@@ -153,7 +250,8 @@
     <div class="tbl"><table id="decide"></table></div>
   </section>
 
-  <section class="card" style="margin-top:16px">
+  <section class="card proof" style="margin-top:16px" id="proof">
+    <p class="eyebrow">The proof</p>
     <h2>🏁 Apex Predator arena: benchmark on ground-truth cases</h2>
     <p class="hint">Each case has one known injected fault plus a decoy problem. A contender scores only if all 4 decisions are right. Run <code>npm run bench</code> to regenerate.</p>
     <div id="arena"><span class="sub">No results yet.</span></div>
@@ -169,7 +267,10 @@
     <div class="scen" id="costs"></div>
   </details>
 </main>
-<footer>All data is synthetic, generated in the browser. Bring your own data via CSV with columns: <code id="cols"></code></footer>
+<footer>
+  <p><b>Muda Lens</b> · built by Manjeet Singh &amp; Vani for the Apex Predator track · <a href="https://github.com/manjeetsingh-satveer/muda-lens" target="_blank" rel="noopener">github.com/manjeetsingh-satveer/muda-lens</a></p>
+  <p>All data is synthetic and modelled on a power-MOSFET line; no employer data is used. Bring your own via CSV with columns: <code id="cols"></code></p>
+</footer>
 
 <script src="src/engine.js"></script>
 <script src="src/app.js"></script>
