@@ -11,6 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,620;1,9..144,500;1,9..144,620&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 <style>
   :root {
     --desk: #e6dccb;
@@ -300,6 +302,20 @@
   #phoneLink code { color: var(--rust-deep); user-select: all; }
   [hidden] { display: none !important; }
 
+  /* Shift report */
+  .report-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0 8px; }
+  .report-controls input { flex: 1 1 240px; min-width: 0; background: #FFFAF3; border: 1px solid var(--rule); padding: 8px 10px; font: inherit; color: var(--ink); }
+  .linkish { background: none; border: 0; padding: 0; font: inherit; color: var(--rust); text-decoration: underline; cursor: pointer; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .report-preview:not(:empty) { margin-top: 12px; padding: 22px 24px; background: #FFFDF8; border: 1px solid var(--rule); box-shadow: 0 10px 30px #1c171214; }
+  .rp-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: flex-end; border-bottom: 2px solid var(--ink); padding-bottom: 10px; }
+  .rp-title { margin: 4px 0 0; font-family: var(--serif); font-size: 1.6rem; font-weight: 620; letter-spacing: -0.03em; }
+  .rp-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px 18px; margin: 14px 0 6px; }
+  .rp-kpis div { display: flex; flex-direction: column; gap: 2px; border-top: 1px solid var(--rule); padding-top: 6px; } .rp-kpis b { font-family: var(--mono); font-weight: 500; font-size: 1.05rem; }
+  .rp-h { margin: 18px 0 6px; font-family: var(--serif); font-weight: 600; font-size: 1.1rem; color: var(--rust); }
+  .rp-facts, .rp-drex { margin: 0; padding-left: 1.3em; color: var(--ink); line-height: 1.5; } .rp-facts li, .rp-drex li { margin: 3px 0; }
+  .rp-table td { vertical-align: top; } .rp-table td:first-child { color: var(--faint); }
+
   /* Swarm board: one tile per station agent, plus the dispatcher's picks */
   .swarm-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0 14px; }
   .swarm-board { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
@@ -475,6 +491,7 @@
       <a href="#why">Why now</a>
       <a href="#demo">The line</a>
       <a href="#swarm">The swarm</a>
+      <a href="#report">Report</a>
       <a href="#proof">The proof</a>
       <a href="https://github.com/manjeetsingh-satveer/muda-lens" target="_blank" rel="noopener">GitHub</a>
     </nav>
@@ -674,6 +691,22 @@
       </div>
       <div class="swarm-board" id="swarmBoard" aria-live="polite"></div>
       <div id="swarmDispatch"></div>
+    </section>
+
+    <section class="sheet wrap" id="report">
+      <p class="kicker">Shift report · for the engineers</p>
+      <h2>Write it up. Hand it over. Keep it.</h2>
+      <p class="hint">One page from this week’s line: the facts and stats, what Drex found on the line, the swarm and any photo, and the changes to make in production, ranked by what they save. Download it as a PDF, send it to the engineers, or save it to the team’s Nace cloud workspace.</p>
+      <div class="report-controls">
+        <button class="primary" id="buildReport" type="button">Write the report</button>
+        <button id="dlReport" type="button" disabled>Download PDF</button>
+        <label class="sr" for="reportTo">Engineers’ emails</label>
+        <input type="email" id="reportTo" multiple placeholder="engineers@yourfab.com, lead@yourfab.com">
+        <button id="sendReport" type="button" disabled>Send to engineers</button>
+        <button id="storeReport" type="button" disabled>Save to cloud</button>
+      </div>
+      <p class="sub" id="reportStatus" aria-live="polite"></p>
+      <div id="reportPreview" class="report-preview"></div>
     </section>
 
     <section class="sheet wrap" id="proof">

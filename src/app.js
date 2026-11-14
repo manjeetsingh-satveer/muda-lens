@@ -60,7 +60,9 @@
         <td>${s.holds}</td><td>${s.rework}</td><td>${money(s.wasteTotal)}</td></tr>`).join("");
   }
 
-  function run() { render(F.analyze(rows, costs)); }
+  // Latest results, kept for the shift report.
+  const LAST = { res: null, decide: null, photo: null, swarm: null, recorded: {} };
+  function run() { LAST.res = F.analyze(rows, costs); LAST.decide = null; LAST.swarm = null; render(LAST.res); }
   function loadScenario() { const s = SCENARIOS[$("scenario").value]; rows = F.generateLots({ lots: 200, seed: s.seed, drift: s.drift }); run(); }
 
   $("run").onclick = loadScenario;
@@ -119,6 +121,7 @@
       <p class="call-s">${esc(act)} Run ${esc(say(a.countermeasure))}.</p></div>`;
   }
   function renderDecide(out, note = "") {
+      LAST.decide = out.drex && !out.drex.error ? out.drex : null; LAST.recorded.decide = !!note;
       $("decideHead").innerHTML = decideHeadline(out.drex);
       $("decide").innerHTML = `<tr><th>Contender</th><th>Waste</th><th>Where</th><th>Fix</th><th>Lots</th><th>Time</th><th>Cost</th></tr>` +
         Object.values(out).map(o => o.error ? `<tr><td>${esc(o.label)}</td><td colspan="6" style="text-align:left;color:var(--warn)">${esc(o.error)}</td></tr>` :
@@ -297,6 +300,7 @@
   const pct = c => c == null ? "" : `${Math.round(c * 100)}%`;
 
   function renderPhoto(o, note = "") {
+    LAST.photo = { ...o, recorded: !!note, sample: currentSample, name: photos[0]?.name };
     const a = o.answers, c = o.confidence || {};
     const defect = a.defect_type && a.defect_type !== "none";
     const act = { release: "Release the lots.", hold: "Hold the lots for review.", rework: "Rework the lots." }[a.disposition] || "";
@@ -339,6 +343,7 @@
     }).join("");
   }
   function drawDispatch(sw, note = "") {
+    if (sw?.picks) { LAST.swarm = sw; LAST.recorded.swarm = !!note; }
     if (!sw?.picks) { $("swarmDispatch").innerHTML = note; return; }
     const lines = sw.picks.map(p => { const r = sw.reports.find(x => x.step === p.step);
       return `<p>Engineer ${p.engineer} → <b>${esc(p.name)}</b> <span class="sub">${esc(WASTE_SAY[r?.problem] || "")}, ${esc(r?.urgency || "")}${p.confidence != null ? ` · Drex ${Math.round(p.confidence * 100)}% sure` : ""}</span></p>`; }).join("");
@@ -372,6 +377,143 @@
       const rec = RECORDED.swarm?.[$("scenario").value];
       if (rec && liveFailed(e)) { drawSwarm(rec.result); drawDispatch(rec.result, recNote(rec.at)); $("swarmStatus").textContent = ""; }
       else { drawSwarm(null); $("swarmStatus").textContent = /fetch|Failed|Server returned (404|405|501)/.test(e.message) ? "The swarm runs live on the team laptop." : e.message; }
+    } finally { btn.disabled = false; }
+  };
+
+  // ---------- Shift report: facts, Drex's findings, what to change; PDF, send, store ----------
+  const SCEN_NAME = { baseline: "Baseline week", litho: "Litho bottleneck + CD drift", backend: "Wire-bond defect spike", improved: "After kaizen" };
+  const money0 = v => "$" + Math.round(v).toLocaleString();
+  function buildReport() {
+    const res = LAST.res || F.analyze(rows, costs);
+    const k = res.kpi, total = res.grand, lots = res.lotCount;
+    const top = res.pareto.slice(0, 3).map(p => ({ name: p.name, perLot: p.value / lots, share: p.value / total }));
+    const weak = res.steps.filter(s => s.cpk < 1.33).sort((a, b) => a.cpk - b.cpk).slice(0, 4)
+      .map(s => ({ step: s.name, param: s.spec.param, cpk: s.cpk, oos: s.oos }));
+    const worstStep = [...res.steps].sort((a, b) => b.wasteTotal - a.wasteTotal)[0];
+    // What to change: the DMAIC actions, ranked by the waste dollars at their step, with a conservative saving estimate.
+    const SAVE = { W: 0.3, I: 0.3, D: 0.4, T: 0.25, O: 0.5, M: 0.2, P: 0.3, S: 0.3 }; // share of that waste a first fix typically removes (assumption)
+    const KEY = { Waiting: "W", Inventory: "I", Defects: "D", Transportation: "T", "Over-processing": "O", Motion: "M", "Over-production": "P", "Skills (unused talent)": "S" };
+    const changes = res.recommendations.map(r => {
+      const st = res.steps.find(s => s.name === r.step); const key = KEY[F.WASTES[r.waste]?.name] || r.waste;
+      const at = st ? st.waste[key] || 0 : 0;
+      return { step: r.step, waste: F.WASTES[r.waste]?.name || r.waste, phase: r.phase, action: r.text, savePerLot: at * (SAVE[key] || 0.25) / lots };
+    }).sort((a, b) => b.savePerLot - a.savePerLot);
+    return {
+      title: "Muda Lens shift report", when: new Date(), week: SCEN_NAME[$("scenario").value] || "Uploaded lot data", lots,
+      kpi: [["Process cycle efficiency", (k.pce * 100).toFixed(1) + "%"], ["Lead time", k.leadDays.toFixed(1) + " days"], ["Rolled throughput yield", (k.rty * 100).toFixed(1) + "%"],
+            ["Sigma level", k.sigma.toFixed(2) + "σ"], ["DPMO per step", Math.round(k.dpmo).toLocaleString()], ["Waste cost per lot", money0(k.wastePerLot)], ["Constraint", res.bottleneck.name]],
+      facts: [
+        `Only ${(k.pce * 100).toFixed(0)}% of a lot’s ${k.leadDays.toFixed(1)}-day lead time is value-add work; the rest is waiting, moving and re-checking.`,
+        `The biggest waste is ${top[0].name.toLowerCase()}: ${money0(top[0].perLot)} per lot, ${(top[0].share * 100).toFixed(0)}% of all waste. The top three wastes are ${(top.reduce((a, t) => a + t.share, 0) * 100).toFixed(0)}% of it.`,
+        `${res.bottleneck.name} is the constraint, with lots queuing ${(res.bottleneck.queue / 60).toFixed(1)} h on average before the tool.`,
+        `${weak.length} of 12 steps can’t reliably hold spec (Cpk under 1.33); the weakest is ${weak[0] ? `${weak[0].step} (${weak[0].param}, Cpk ${weak[0].cpk.toFixed(2)})` : "none"}.`,
+        `${worstStep.name} carries the most waste cost of any single step: ${money0(worstStep.wasteTotal / lots)} per lot.`,
+      ],
+      top, weak, changes,
+      drex: LAST.decide, drexRecorded: LAST.recorded.decide, swarm: LAST.swarm, swarmRecorded: LAST.recorded.swarm, photo: LAST.photo,
+    };
+  }
+  function drexLine(r) {
+    if (!r.drex) return "Not run this shift. Click “Ask Drex” in “Drex decides”.";
+    const a = r.drex.answers, c = r.drex.confidence || {}, sure = Math.min(c.root_waste ?? 1, c.culprit_step ?? 1);
+    if (sure < 0.5) return `Nothing clearly wrong. Drex’s best guess is only ${pct(sure)} sure.`;
+    return `${say(a.root_waste)} at ${stepName(a.culprit_step)} (${pct(sure)} sure). ${({ release: "Release", hold: "Hold", rework: "Rework" })[a.disposition]} the lots; run ${say(a.countermeasure)}.${r.drexRecorded ? " (recorded run)" : ""}`;
+  }
+  function swarmLine(r) {
+    if (!r.swarm) return "Not run this shift. Click “Run the swarm”.";
+    if (!r.swarm.picks.length) return `No station asked for an engineer (${r.swarm.drexCalls} Drex calls).`;
+    return r.swarm.picks.map(p => `Engineer ${p.engineer} → ${p.name}`).join("; ") + `. ${r.swarm.drexCalls} Drex calls.${r.swarmRecorded ? " (recorded run)" : ""}`;
+  }
+  function photoLine(r) {
+    if (!r.photo) return "No photo reviewed this shift.";
+    const a = r.photo.answers; const d = a.defect_type && a.defect_type !== "none";
+    return `${d ? say(a.defect_type) + " found" : "No defect seen"} on ${String(r.photo.name || "the photo")}. ${({ release: "Release", hold: "Hold", rework: "Rework" })[a.disposition] || ""} the lots.${r.photo.recorded ? " (recorded run)" : ""}`;
+  }
+  function renderReport() {
+    const r = buildReport();
+    $("reportPreview").innerHTML = `
+      <div class="rp-head"><div><p class="call-k">Shift report · ${esc(r.week)}</p><p class="rp-title">What the line is telling us</p></div>
+        <p class="call-meta">${esc(r.when.toLocaleString())} · ${r.lots} lots</p></div>
+      <div class="rp-kpis">${r.kpi.map(([l, v]) => `<div><span class="fl">${esc(l)}</span><b>${esc(v)}</b></div>`).join("")}</div>
+      <p class="rp-h">The facts</p><ol class="rp-facts">${r.facts.map(f => `<li>${esc(f)}</li>`).join("")}</ol>
+      <p class="rp-h">Drex this shift</p>
+      <ul class="rp-drex"><li><b>Line call:</b> ${esc(drexLine(r))}</li><li><b>Swarm:</b> ${esc(swarmLine(r))}</li><li><b>Photo:</b> ${esc(photoLine(r))}</li></ul>
+      <p class="rp-h">What to change in production</p>
+      <div class="tbl"><table class="rp-table"><tr><th>#</th><th>Where</th><th>Change</th><th>Phase</th><th>Est. saving / lot</th></tr>
+        ${r.changes.slice(0, 6).map((c, i) => `<tr><td>${i + 1}</td><td>${esc(c.step)}<br><span class="fl">${esc(c.waste)}</span></td><td style="white-space:normal;text-align:left">${esc(c.action)}</td><td>${esc(c.phase)}</td><td>${money0(c.savePerLot)}</td></tr>`).join("")}</table></div>
+      <p class="call-meta">Savings assume a first fix removes 20–50% of that waste at that step. Data is synthetic, modelled on a power-MOSFET line.</p>`;
+    return r;
+  }
+
+  function makePdf(r) {
+    const { jsPDF } = window.jspdf; const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const W = doc.internal.pageSize.getWidth(), M = 48; let y = 44;
+    const ink = [28, 23, 18], rust = [156, 52, 31], soft = [78, 71, 63];
+    // The PDF's built-in fonts only cover Latin-1, so spell out symbols they can't draw.
+    const safe = s => String(s).replace(/σ/g, " sigma").replace(/→/g, "->").replace(/≥/g, ">=").replace(/≤/g, "<=").replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/–/g, "-").replace(/—/g, " - ").replace(/·/g, "|").replace(/µ/g, "u");
+    const text = (s, size = 10, color = ink, style = "normal", font = "helvetica") => {
+      doc.setFont(font, style); doc.setFontSize(size); doc.setTextColor(...color);
+      const lines = doc.splitTextToSize(safe(s), W - 2 * M);
+      doc.text(lines, M, y + size * 0.8);           // y is the top of the line box; jsPDF draws at the baseline
+      y += lines.length * size * 1.3;
+    };
+    const cell = v => safe(v);
+    const need = h => { if (y + h > doc.internal.pageSize.getHeight() - 56) { doc.addPage(); y = 56; } };
+    doc.setFillColor(...rust); doc.rect(0, 0, W, 6, "F");
+    text("MUDA LENS · SHIFT REPORT", 9, rust, "bold"); y += 2;
+    text("What the line is telling us", 22, ink, "bold", "times");
+    text(`${r.week} · ${r.lots} lots · ${r.when.toLocaleString()}`, 9, soft); y += 6;
+    doc.autoTable({ startY: y, margin: { left: M, right: M }, head: [r.kpi.map(k => cell(k[0]))], body: [r.kpi.map(k => cell(k[1]))], theme: "plain",
+      styles: { fontSize: 8, cellPadding: 4, textColor: ink }, headStyles: { textColor: soft, fontStyle: "normal", fontSize: 7 }, bodyStyles: { fontStyle: "bold", fontSize: 10 } });
+    y = doc.lastAutoTable.finalY + 12;
+    text("The facts", 13, rust, "bold", "times"); y += 2; r.facts.forEach((f, i) => { need(26); text(`${i + 1}.  ${f}`, 9.5); y += 1; });
+    y += 6; need(70); text("Drex this shift", 13, rust, "bold", "times"); y += 2;
+    [["Line call", drexLine(r)], ["Swarm", swarmLine(r)], ["Photo", photoLine(r)]].forEach(([l, v]) => { need(24); text(`${l}: ${v}`, 9.5); y += 1; });
+    y += 6; need(60); text("What to change in production", 13, rust, "bold", "times"); y += 2;
+    doc.autoTable({ startY: y, margin: { left: M, right: M }, head: [["#", "Where", "Change", "Phase", "Saving / lot", "Owner"]],
+      body: r.changes.slice(0, 6).map((c, i) => [i + 1, cell(`${c.step}\n${c.waste}`), cell(c.action), c.phase, money0(c.savePerLot), ""]),
+      styles: { fontSize: 8, cellPadding: 4, textColor: ink, lineColor: [213, 201, 182], lineWidth: 0.5 }, headStyles: { fillColor: [28, 23, 18], textColor: [246, 240, 230] },
+      columnStyles: { 0: { cellWidth: 18 }, 1: { cellWidth: 90 }, 3: { cellWidth: 50 }, 4: { cellWidth: 56, halign: "right" }, 5: { cellWidth: 58 } }, theme: "grid" });
+    y = doc.lastAutoTable.finalY + 10;
+    if (r.weak.length) { need(70); text("Steps that can't hold spec (Cpk < 1.33)", 10.5, ink, "bold"); y += 2;
+      doc.autoTable({ startY: y, margin: { left: M, right: M }, head: [["Step", "Critical parameter", "Cpk", "Out of spec"]],
+        body: r.weak.map(w => [w.step, cell(w.param), w.cpk.toFixed(2), (w.oos * 100).toFixed(1) + "%"]), styles: { fontSize: 8, cellPadding: 3 }, headStyles: { fillColor: [230, 220, 203], textColor: ink }, theme: "grid" });
+      y = doc.lastAutoTable.finalY + 10; }
+    need(24); text("Savings assume a first fix removes 20-50% of that waste at that step. Data is synthetic, modelled on a power-MOSFET line. Drex decisions come from drex-max-v1.1; an engineer owns every call.", 7.5, soft);
+    return doc;
+  }
+  const reportName = r => `muda-lens-shift-report-${r.when.toISOString().slice(0, 16).replace(/[:T]/g, "-")}.pdf`;
+  let lastReport = null;
+  $("buildReport").onclick = () => { lastReport = renderReport(); ["dlReport", "sendReport", "storeReport"].forEach(id => $(id).disabled = false); $("reportStatus").textContent = ""; };
+  $("dlReport").onclick = () => { const r = lastReport || renderReport(); makePdf(r).save(reportName(r)); $("reportStatus").textContent = "PDF downloaded."; };
+  $("sendReport").onclick = async () => {
+    const r = lastReport || renderReport(); const doc = makePdf(r); const name = reportName(r);
+    const file = new File([doc.output("blob")], name, { type: "application/pdf" });
+    const to = $("reportTo").value.split(/[,;\s]+/).filter(s => /.+@.+\..+/.test(s));
+    const summary = `Shift report (${r.week}):\n\n${r.facts.map((f, i) => `${i + 1}. ${f}`).join("\n")}\n\nDrex: ${drexLine(r)}\nSwarm: ${swarmLine(r)}\n\nTop change: ${r.changes[0]?.step}: ${r.changes[0]?.action}`;
+    if (navigator.canShare?.({ files: [file] })) {
+      try { await navigator.share({ title: "Muda Lens shift report", text: summary, files: [file] }); $("reportStatus").textContent = "Shared."; return; } catch (e) { if (e.name === "AbortError") return; }
+    }
+    doc.save(name);
+    location.href = `mailto:${encodeURIComponent(to.join(","))}?subject=${encodeURIComponent("Muda Lens shift report: " + r.week)}&body=${encodeURIComponent(summary + "\n\n(PDF attached: " + name + ")")}`;
+    $("reportStatus").textContent = `PDF downloaded as ${name}. Your mail app opened with the summary; attach the PDF and send.`;
+  };
+  $("storeReport").onclick = async () => {
+    const r = lastReport || renderReport(); const name = reportName(r); const btn = $("storeReport"); btn.disabled = true;
+    $("reportStatus").textContent = "Saving to the cloud…";
+    try {
+      const b64 = makePdf(r).output("datauristring").split(",")[1];
+      const res = await fetch("api/report/store", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pdfBase64: b64, filename: name }) });
+      const o = await res.json().catch(() => ({ error: "Server returned " + res.status }));
+      if (!res.ok || o.error) throw new Error(o.error || "Server returned " + res.status);
+      $("reportStatus").innerHTML = `Saved to the Nace cloud: “${esc(o.workspace)}” / ${esc(o.path)} (${Math.round(o.bytes / 1024)} KB).` +
+        (o.download_url ? ` <a href="${esc(o.download_url)}" target="_blank" rel="noopener">Open the stored PDF</a> · <button type="button" class="linkish" id="copyCloud">Copy link for engineers</button>` : "");
+      if (o.download_url) $("copyCloud").onclick = async () => {
+        try { await navigator.clipboard.writeText(o.download_url); $("copyCloud").textContent = "Link copied"; }
+        catch { $("copyCloud").textContent = "Copy failed: right-click the link instead"; }
+      };
+    } catch (e) {
+      $("reportStatus").textContent = /fetch|Failed|Server returned (404|405|501)/.test(e.message) ? "Saving to the cloud runs on the team laptop. Download the PDF instead." : e.message;
     } finally { btn.disabled = false; }
   };
 

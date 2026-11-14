@@ -8,6 +8,7 @@ const { buildState } = require("./bench/cases.js");
 const C = require("./bench/contenders.js");
 const { diagnosePhoto } = require("./src/photo.js");
 const { runSwarm } = require("./src/swarm.js");
+const { storeReport } = require("./src/cloud.js");
 
 const PORT = Number(process.env.PORT || 5173);
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".css": "text/css", ".csv": "text/csv", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".md": "text/markdown" };
@@ -32,6 +33,11 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, out);
     } catch (e) { return json(res, 400, { error: e.message }); }
   }
+  if (req.method === "POST" && req.url === "/api/report/store") {
+    let body = ""; for await (const chunk of req) { body += chunk; if (body.length > 15e6) return json(res, 413, { error: "The PDF is too large." }); }
+    try { return json(res, 200, await storeReport(JSON.parse(body))); }
+    catch (e) { return json(res, 400, { error: e.message }); }
+  }
   if (req.method === "POST" && req.url === "/api/swarm") {
     let body = ""; for await (const chunk of req) { body += chunk; if (body.length > 5e6) return json(res, 413, { error: "too large" }); }
     try { return json(res, 200, await runSwarm(JSON.parse(body))); }
@@ -45,7 +51,7 @@ const server = http.createServer(async (req, res) => {
   // static files
   const rel = decodeURIComponent((req.url.split("?")[0] === "/" ? "/index.html" : req.url.split("?")[0]));
   const file = path.normalize(path.join(__dirname, rel));
-  if (!file.startsWith(__dirname) || /[\\/]\.(env|git)/.test(file)) { res.writeHead(403); return res.end(); }
+  if (!file.startsWith(__dirname) || /[\\/]\.(env|git|nace)/.test(file)) { res.writeHead(403); return res.end(); }
   fs.readFile(file, (err, data) => {
     if (err) { res.writeHead(404); return res.end("not found"); }
     res.writeHead(200, { "Content-Type": TYPES[path.extname(file)] || "application/octet-stream" }); res.end(data);
