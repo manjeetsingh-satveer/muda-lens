@@ -7,6 +7,7 @@ const F = require("./src/engine.js");
 const { buildState } = require("./bench/cases.js");
 const C = require("./bench/contenders.js");
 const { diagnosePhoto } = require("./src/photo.js");
+const { runSwarm } = require("./src/swarm.js");
 
 const PORT = Number(process.env.PORT || 5173);
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".css": "text/css", ".csv": "text/csv", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".md": "text/markdown" };
@@ -30,6 +31,11 @@ const server = http.createServer(async (req, res) => {
       }));
       return json(res, 200, out);
     } catch (e) { return json(res, 400, { error: e.message }); }
+  }
+  if (req.method === "POST" && req.url === "/api/swarm") {
+    let body = ""; for await (const chunk of req) { body += chunk; if (body.length > 5e6) return json(res, 413, { error: "too large" }); }
+    try { return json(res, 200, await runSwarm(JSON.parse(body))); }
+    catch (e) { return json(res, 400, { error: e.message }); }
   }
   if (req.method === "POST" && req.url === "/api/photo") {
     let body = ""; for await (const chunk of req) { body += chunk; if (body.length > 4.2e6) return json(res, 413, { error: "Photos are too large together. Use fewer or smaller photos (about 3 MB total)." }); }

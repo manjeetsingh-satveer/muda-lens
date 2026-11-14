@@ -300,6 +300,29 @@
   #phoneLink code { color: var(--rust-deep); user-select: all; }
   [hidden] { display: none !important; }
 
+  /* Swarm board: one tile per station agent, plus the dispatcher's picks */
+  .swarm-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0 14px; }
+  .swarm-board { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 1000px) { .swarm-board { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @media (max-width: 640px) { .swarm-board { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .st { position: relative; background: #FFFAF3; border: 1px solid var(--rule); padding: 10px 10px 12px; min-height: 128px; display: flex; flex-direction: column; gap: 4px; transition: border-color .3s, background .3s; }
+  .st .sid { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.12em; color: var(--faint); }
+  .st .sname { font-family: var(--serif); font-weight: 600; font-size: 0.98rem; line-height: 1.15; color: var(--ink); }
+  .st .sprob { font-size: 0.82rem; color: var(--ink-soft); }
+  .st .surg { font-family: var(--mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; margin-top: auto; }
+  .st .shelp { height: 3px; background: var(--rule); } .st .shelp i { display: block; height: 100%; background: var(--ink-soft); }
+  .st.pending { opacity: .55; } .st.pending .sprob { font-style: italic; }
+  .st.thinking { animation: stpulse 1s ease-in-out infinite alternate; }
+  @keyframes stpulse { from { background: #FFFAF3; } to { background: #F3E3D8; } }
+  .st.calm .surg { color: var(--green); }
+  .st.watch { border-color: var(--warn); } .st.watch .surg { color: var(--warn); } .st.watch .shelp i { background: var(--warn); }
+  .st.hot { border-color: var(--rust); background: #F9EBE3; } .st.hot .surg { color: var(--rust); } .st.hot .shelp i { background: var(--rust); }
+  .st .eng { position: absolute; top: -9px; right: 8px; background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 0.66rem; padding: 2px 7px; letter-spacing: 0.06em; }
+  @media (prefers-reduced-motion: reduce) { .st.thinking { animation: none; } }
+  .dispatch { margin-top: 14px; padding: 14px 16px; background: #FFFAF3; border: 1px solid var(--rule); border-left: 4px solid var(--ink); }
+  .dispatch .call-k { display: block; margin-bottom: 4px; }
+  .dispatch p { margin: 4px 0; } .dispatch b { font-family: var(--serif); font-size: 1.15rem; }
+
   /* Drex's call: one headline verdict, then the six answers as a tidy ledger */
   #photoResult, #photoResult * { font-style: normal; }
   .call-card { margin-top: 10px; padding: 18px 20px 16px; background: #FFFAF3; border: 1px solid var(--rule); border-left: 4px solid var(--green); }
@@ -451,6 +474,7 @@
       <a href="#photoCard">The bench</a>
       <a href="#why">Why now</a>
       <a href="#demo">The line</a>
+      <a href="#swarm">The swarm</a>
       <a href="#proof">The proof</a>
       <a href="https://github.com/manjeetsingh-satveer/muda-lens" target="_blank" rel="noopener">GitHub</a>
     </nav>
@@ -634,6 +658,20 @@
       </div>
       <div class="tbl"><table id="decide"></table></div>
       <div id="decideNote"></div>
+    </section>
+
+    <section class="sheet wrap" id="swarm">
+      <p class="kicker">Swarm · every agent’s call is Drex’s</p>
+      <h2>Twelve stations ask for help. Drex sends the engineers.</h2>
+      <p class="hint">Each station is its own agent. It sees only its own step, this week against normal, and asks Drex whether it needs help, what the waste is, and how urgent it is. Then a dispatcher agent asks Drex where the engineers on shift should go, one at a time.</p>
+      <div class="controls swarm-controls">
+        <label for="swarmEngineers" class="sub">Engineers on shift</label>
+        <select id="swarmEngineers"><option>1</option><option selected>2</option><option>3</option></select>
+        <button class="primary" id="runSwarm" type="button">Run the swarm</button>
+        <span class="sub" id="swarmStatus">Uses the week picked in “The line” above.</span>
+      </div>
+      <div class="swarm-board" id="swarmBoard" aria-live="polite"></div>
+      <div id="swarmDispatch"></div>
     </section>
 
     <section class="sheet wrap" id="proof">

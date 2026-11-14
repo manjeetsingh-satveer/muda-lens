@@ -304,6 +304,46 @@
       ${o.fallback === "claude" ? `<p class="recnote">Drex wasn’t reachable from this network, so ${esc(o.model)} answered the same questions as a fallback. It doesn’t return confidence.</p>` : ""}`;
   }
 
+  // ---------- Swarm: 12 station agents + a dispatcher, every call by Drex ----------
+  const WASTE_SAY = { transportation: "Transportation", inventory: "Inventory", motion: "Motion", waiting: "Waiting", overprocessing: "Over-processing", overproduction: "Over-production", defects: "Defects", skills: "Unused skills" };
+  function drawSwarm(sw, state = "done") {
+    const pick = Object.fromEntries((sw?.picks || []).map(p => [p.step, p]));
+    $("swarmBoard").innerHTML = F.STEPS.map(st => {
+      const r = sw?.reports?.find(x => x.step === st.id);
+      if (!r) return `<div class="st ${state === "thinking" ? "thinking" : "pending"}"><span class="sid">${st.id}</span><span class="sname">${esc(st.name)}</span><span class="sprob">${state === "thinking" ? "asking Drex…" : "waiting to run"}</span></div>`;
+      const level = r.needsHelp >= 0.5 || r.ask === "engineer_now" ? (r.urgencyScore >= 2 || r.ask === "engineer_now" ? "hot" : "watch") : "calm";
+      const prob = level === "calm" ? "Running normally" : WASTE_SAY[r.problem] || r.problem;
+      const p = pick[r.step];
+      return `<div class="st ${level}">${p ? `<span class="eng">ENGINEER ${p.engineer}</span>` : ""}<span class="sid">${r.step}</span><span class="sname">${esc(r.name)}</span>
+        <span class="sprob">${esc(prob)}</span><span class="shelp" title="Needs help ${Math.round(r.needsHelp * 100)}%"><i style="width:${Math.round(r.needsHelp * 100)}%"></i></span>
+        <span class="surg">${level === "calm" ? "No help needed" : esc(r.urgency)} · ${Math.round(r.needsHelp * 100)}%</span></div>`;
+    }).join("");
+  }
+  function drawDispatch(sw, note = "") {
+    if (!sw?.picks) { $("swarmDispatch").innerHTML = note; return; }
+    const lines = sw.picks.map(p => { const r = sw.reports.find(x => x.step === p.step);
+      return `<p>Engineer ${p.engineer} → <b>${esc(p.name)}</b> <span class="sub">${esc(WASTE_SAY[r?.problem] || "")}, ${esc(r?.urgency || "")}${p.confidence != null ? ` · Drex ${Math.round(p.confidence * 100)}% sure` : ""}</span></p>`; }).join("");
+    const unsent = sw.reports.filter(r => (r.needsHelp >= 0.5 || r.ask === "engineer_now") && !sw.picks.some(p => p.step === r.step));
+    $("swarmDispatch").innerHTML = `<div class="dispatch"><span class="call-k">Dispatcher · Drex’s call</span>${lines || "<p>No station needs an engineer this shift.</p>"}
+      ${unsent.length ? `<p class="sub">Also asked for help, no engineer left: ${esc(unsent.map(r => r.name).join(", "))}.</p>` : ""}
+      <p class="call-meta">${sw.drexCalls} Drex calls · ${(sw.wallMs / 1000).toFixed(1)} s · $${sw.costUsd.toFixed(4)} · ${esc(sw.model)}</p></div>${note}`;
+  }
+  drawSwarm(null);
+  $("runSwarm").onclick = async () => {
+    const btn = $("runSwarm"); btn.disabled = true; $("swarmStatus").textContent = "12 station agents are asking Drex…";
+    drawSwarm(null, "thinking"); $("swarmDispatch").innerHTML = "";
+    try {
+      const r = await fetch("api/swarm", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rows, engineers: $("swarmEngineers").value }) });
+      const sw = await r.json().catch(() => ({ error: "Server returned " + r.status }));
+      if (!r.ok || sw.error) throw new Error(sw.error || "Server returned " + r.status);
+      drawSwarm(sw); drawDispatch(sw); $("swarmStatus").textContent = "";
+    } catch (e) {
+      const rec = RECORDED.swarm?.[$("scenario").value];
+      if (rec && liveFailed(e)) { drawSwarm(rec.result); drawDispatch(rec.result, recNote(rec.at)); $("swarmStatus").textContent = ""; }
+      else { drawSwarm(null); $("swarmStatus").textContent = /fetch|Failed|Server returned (404|405|501)/.test(e.message) ? "The swarm runs live on the team laptop." : e.message; }
+    } finally { btn.disabled = false; }
+  };
+
   // ---------- Arena (benchmark results) ----------
   fetch("bench/results.json").then(r => r.ok ? r.json() : null).then(res => {
     if (!res) return;

@@ -151,4 +151,4 @@ function buildCases(n = 70, seed = 2026, dataSeed = 1000) {
   return cases;
 }
 
-module.exports = { QUESTIONS, FAULTS, PRIORITY, buildCases, buildState, summarize, HISTORY };
+module.exports = { QUESTIONS, FAULTS, PRIORITY, buildCases, buildState, summarize, changes, HISTORY };
