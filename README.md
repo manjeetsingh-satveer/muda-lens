@@ -1,4 +1,5 @@
 # Muda Lens 🦖
+n**Live demo:** https://manjeetsingh-satveer.github.io/muda-lens/ (live Drex calls and photo diagnosis need `npm start` locally with API keys)
 
 **Track: Apex Predator, Drex vs. the Giants.**
 In semiconductor manufacturing, a Lean Six Sigma black belt makes the same few decisions every week. We give those decisions to **Drex** and test it on cases with known answers against a frontier LLM (Claude Opus 5.5) and classic rule-based SPC.
