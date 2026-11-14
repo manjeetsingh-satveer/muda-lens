@@ -93,7 +93,7 @@
     } catch (e) {
       const rec = RECORDED.line?.[$("scenario").value];
       if (rec && liveFailed(e)) { renderDecide(rec.result, recNote(rec.at)); $("drexStatus").textContent = ""; return; }
-      $("drexStatus").textContent = e.message.includes("fetch") ? "Live calls need the server: run `npm start`." : e.message;
+      $("drexStatus").textContent = /fetch|Failed|Server returned (404|405|501)/.test(e.message) ? "This public page can’t call Drex live. Live calls run on the team laptop." : e.message;
     }
   }
   function renderDecide(out, note = "") {
@@ -230,7 +230,10 @@
     } catch (e) {
       const rec = currentSample && RECORDED.photo?.[currentSample];
       if (rec && liveFailed(e)) { renderPhoto(rec.result, recNote(rec.at)); $("photoStatus").textContent = ""; }
-      else $("photoStatus").textContent = /fetch|Failed/.test(e.message) ? "Live photo diagnosis runs on the team laptop (npm start). Try one of the samples to see a recorded Drex run." : e.message;
+      else $("photoStatus").textContent = /fetch|Failed|Server returned (404|405|501)/.test(e.message)
+        ? (RECORDED.photo ? "This public page can’t call Drex live. Pick one of the samples to see Drex’s recorded answer, or use the team laptop for your own photos."
+                          : "This public page can’t call Drex live. Live photo diagnosis runs on the team laptop.")
+        : e.message;
     } finally { $("diagnosePhotos").disabled = !photos.length; }
   };
   function renderPhoto(o, note = "") {
