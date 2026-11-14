@@ -359,11 +359,12 @@
     const sel = $("scenario");
     if (sel.value === "baseline" || sel.value === "improved") { sel.value = "backend"; sel.dispatchEvent(new Event("change")); }
     // scroll after the charts above have re-drawn, so the board doesn't move out from under the jump
-    requestAnimationFrame(() => setTimeout(() => {
+    // (a plain timer, not requestAnimationFrame: rAF never fires in a background tab)
+    setTimeout(() => {
+      if (!$("runSwarm").disabled) $("runSwarm").click();
       $("swarm").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
       history.replaceState(null, "", "#swarm");
-      if (!$("runSwarm").disabled) $("runSwarm").click();
-    }, 150));
+    }, 200);
   }));
   $("runSwarm").onclick = async () => {
     const btn = $("runSwarm"); btn.disabled = true; $("swarmStatus").textContent = "12 station agents are asking Drex…";
