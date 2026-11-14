@@ -4,63 +4,67 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Muda Lens</title>
-<meta name="description" content="Muda Lens: Drex finds the waste in a semiconductor line and decides the fix in 0.3 seconds.">
+<meta name="description" content="Muda Lens reads a semiconductor line, or a photo from the floor, and says which waste it is and whether the lots should ship.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560;9..144,640&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
-  /* Layout: sticky nav → pitch hero → problem / why now / how → photo → live line → proof. Dark graphite cleanroom; teal = value-add, amber = waste. */
-  :root { --bg:#0E1416; --bg2:#111A1C; --panel:#152024; --line:#26363A; --ink:#E8EDEB; --mute:#93A6A3; --acc:#3FC1B0; --bad:#E5484D; --warn:#F2A33A; --good:#46C37B;
-          --sans:'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; --mono:'JetBrains Mono', ui-monospace, Consolas, monospace; color-scheme:dark; }
+  /* Paper, ink, one red. Teal in the charts is still value-adding time. Amber is still waiting. */
+  :root { --bg:#e7dccb; --bg2:#efe6d6; --panel:#f7f1e6; --line:#d3c6b2; --ink:#1c1712; --mute:#5c564c; --acc:#1e3f34; --rust:#9c341f; --bad:#9c2b1a; --warn:#8a4e12; --good:#1e3f34;
+          --sans:'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; --serif:'Fraunces', 'Iowan Old Style', Georgia, serif; --mono:'JetBrains Mono', ui-monospace, Consolas, monospace; color-scheme:light; }
   * { box-sizing: border-box; }
   html { scroll-behavior:smooth; scroll-padding-top:72px; }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } .stat, .hero h1, .hero .lead { animation:none !important; } }
-  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.55 var(--sans); }
-  a { color:var(--acc); }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 var(--sans); }
+  body::before { content:""; display:block; height:6px; background:var(--rust); }
+  ::selection { background:#ead3c4; color:var(--ink); }
+  a { color:var(--rust); }
+  h1, h2.sect, .bench-head h2 { font-family:var(--serif); font-weight:560; font-optical-sizing:auto; }
   h1, h2, h3 { text-wrap:balance; }
   .sub { color:var(--mute); font-size:13px; }
-  .eyebrow { font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--acc); margin:0 0 10px; font-weight:600; }
+  .eyebrow { font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--rust); margin:0 0 10px; font-weight:500; }
   .mute { color:var(--mute); } .amber { color:var(--warn) !important; }
 
-  .topnav { position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:12px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px)); background:#0E1416e6; backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
-  .brand { display:flex; align-items:center; gap:8px; color:var(--ink); text-decoration:none; font-size:18px; } .brand b { color:var(--acc); } .brand svg { color:var(--acc); }
-  .navlinks { display:flex; gap:18px; align-items:center; flex-wrap:wrap; } .navlinks a { color:var(--mute); text-decoration:none; font-size:14px; } .navlinks a:hover { color:var(--ink); }
-  .navlinks .gh { border:1px solid var(--line); padding:5px 12px; border-radius:99px; color:var(--ink); }
-  @media (max-width:640px) { .navlinks a:not(.gh) { display:none; } }
+  .topnav { position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px max(16px, env(safe-area-inset-right, 0px)) 14px max(16px, env(safe-area-inset-left, 0px)); background:#f7f1e6f2; border-bottom:1px solid var(--line); }
+  .brand { display:flex; align-items:center; gap:8px; color:var(--ink); text-decoration:none; font-family:var(--serif); font-size:22px; letter-spacing:-.03em; } .brand b { font-weight:560; } .brand svg { color:var(--rust); }
+  .navlinks { display:flex; gap:14px 18px; align-items:center; flex-wrap:wrap; justify-content:flex-end; } .navlinks a { color:var(--mute); text-decoration:none; font-size:14px; white-space:nowrap; } .navlinks a:hover { color:var(--ink); }
+  .navlinks .gh { border:0; border-bottom:1px solid var(--ink); padding:0 0 1px; border-radius:0; color:var(--ink); }
+  @media (max-width:720px) {
+    .topnav { align-items:flex-start; flex-direction:column; }
+    .navlinks { justify-content:flex-start; }
+  }
 
-  .hero { position:relative; overflow:hidden; border-bottom:1px solid var(--line);
-          background: radial-gradient(900px 420px at 85% -10%, #3FC1B02b, transparent 60%), radial-gradient(700px 380px at -10% 110%, #F2A33A1c, transparent 60%), var(--bg); }
-  .hero::before { content:""; position:absolute; inset:0; background-image: linear-gradient(#ffffff08 1px, transparent 1px), linear-gradient(90deg, #ffffff08 1px, transparent 1px); background-size:44px 44px; mask-image:linear-gradient(180deg, #000 40%, transparent); pointer-events:none; }
+  .hero { position:relative; overflow:hidden; border-bottom:1px solid var(--line); background:var(--bg); }
   .hero-in, .band-in { position:relative; max-width:1200px; margin:0 auto; padding-block:64px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
-  .hero h1 { font-size:clamp(40px, 6.4vw, 84px); line-height:1.02; letter-spacing:-.03em; margin:0 0 20px; font-weight:700; }
-  .hero h1 span { color:var(--acc); }
-  .lead { font-size:clamp(17px, 1.6vw, 20px); color:#C3D0CD; max-width:62ch; margin:0 0 28px; } .lead b { color:var(--ink); }
-  .cta { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:40px; }
-  .btn { display:inline-flex; align-items:center; gap:8px; padding:12px 20px; border-radius:10px; border:1px solid var(--line); color:var(--ink); text-decoration:none; font-weight:600; background:var(--panel); }
-  .btn.primary { background:var(--acc); color:#062320; border-color:var(--acc); } .btn:hover { filter:brightness(1.08); }
+  .hero h1 { font-size:clamp(44px, 6.2vw, 80px); line-height:.96; letter-spacing:-.035em; margin:0; font-weight:560; max-width:12ch; }
+  .h1b { margin:12px 0 0; font-family:var(--serif); font-style:italic; font-weight:520; font-size:clamp(28px, 3.4vw, 42px); letter-spacing:-.03em; color:var(--rust); }
+  .lead { font-size:clamp(17px, 1.5vw, 19px); color:var(--mute); max-width:40rem; margin:18px 0 28px; } .lead b { color:var(--ink); }
+  .cta { display:flex; flex-wrap:wrap; gap:18px; align-items:center; margin-bottom:36px; }
+  .btn { display:inline-flex; align-items:center; gap:8px; padding:12px 18px; border-radius:2px; border:1px solid var(--ink); color:var(--ink); text-decoration:none; font-weight:500; background:transparent; }
+  .btn.primary { background:var(--ink); color:var(--panel); border-color:var(--ink); } .btn:hover { background:var(--rust); border-color:var(--rust); color:#fffaf3; }
   .stats { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px; }
   @media (max-width:760px) { .stats { grid-template-columns:1fr; } }
-  .stat { background:#152024cc; border:1px solid var(--line); border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:6px; animation:rise .7s cubic-bezier(.2,.7,.2,1) both; }
+  .stat { background:transparent; border:0; border-top:1px solid var(--ink); border-radius:0; padding:14px 0 0; display:flex; flex-direction:column; gap:6px; }
   .stat:nth-child(2) { animation-delay:.1s; } .stat:nth-child(3) { animation-delay:.2s; }
-  .stat .big { font-family:var(--mono); font-size:clamp(34px, 4vw, 48px); font-weight:600; color:var(--acc); line-height:1; font-variant-numeric:tabular-nums; }
+  .stat .big { font-family:var(--serif); font-size:clamp(36px, 4vw, 52px); font-weight:560; color:var(--ink); line-height:.95; letter-spacing:-.03em; }
   .stat .lbl { font-size:14px; color:var(--ink); } .stat .lbl .mute { font-size:13px; }
   @keyframes rise { from { opacity:.0; transform:translateY(14px); } to { opacity:1; transform:none; } }
 
   .band { background:var(--bg2); border-bottom:1px solid var(--line); }
-  h2.sect { font-size:clamp(26px, 3.2vw, 40px); line-height:1.12; letter-spacing:-.02em; margin:0 0 14px; } h2.sect em { font-style:normal; color:var(--warn); }
+  h2.sect { font-size:clamp(26px, 3.2vw, 40px); line-height:1.12; letter-spacing:-.02em; margin:0 0 14px; } h2.sect em { font-style:italic; color:var(--rust); }
   .narrow { max-width:70ch; }
   .trio { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px; }
-  .tile { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px; }
+  .tile { background:transparent; border:0; border-top:1px solid var(--line); border-radius:0; padding:16px 0 0; }
   .tile .k { font-family:var(--mono); font-size:12px; color:var(--warn); letter-spacing:.08em; text-transform:uppercase; }
   .tile h3 { margin:8px 0 6px; font-size:19px; } .tile p { margin:0; color:var(--mute); font-size:14px; }
   .steps { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px; }
   .step { display:flex; gap:14px; align-items:flex-start; } .step h3 { margin:2px 0 4px; font-size:17px; } .step p { margin:0; color:var(--mute); font-size:14px; }
-  .step .n { flex:0 0 34px; height:34px; border-radius:50%; display:grid; place-items:center; font-family:var(--mono); font-weight:600; background:#3FC1B022; color:var(--acc); border:1px solid #3FC1B055; }
+  .step .n { flex:0 0 auto; font-family:var(--serif); font-style:italic; font-size:28px; color:var(--rust); line-height:1; }
   @media (max-width:860px) { .trio, .steps { grid-template-columns:1fr; } }
 
   main { max-width:1200px; margin:0 auto; padding-block:40px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); display:flex; flex-direction:column; gap:16px; }
   main > * { margin-top:0 !important; margin-bottom:0 !important; }
-  #photoCard { order:-2; border-color:#3FC1B055; background:linear-gradient(180deg, #3FC1B00f, transparent 140px), var(--panel); }
+  #photoCard { order:-2; padding:28px; }
   .demo-head { order:-1; display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; justify-content:space-between; padding-top:24px; }
   .demo-head h2.sect { margin:0; }
   .card.proof { border-color:#F2A33A55; }
@@ -68,40 +72,63 @@
   footer p { margin:4px 0; } footer b { color:var(--ink); }
   .controls { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
   button, select, input[type=number] { background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:8px 12px; font:inherit; }
-  button { cursor:pointer; } button.primary { background:var(--acc); color:#06201d; border-color:var(--acc); font-weight:600; }
+  button { cursor:pointer; } button.primary { background:var(--ink); color:#f7f1e6; border-color:var(--ink); font-weight:500; }
+  button.primary:hover { background:var(--rust); border-color:var(--rust); }
   label.file { border:1px dashed var(--line); padding:8px 12px; border-radius:8px; cursor:pointer; color:var(--mute); }
   .grid { display:grid; gap:16px; }
   .kpis { grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); margin:16px 0; }
-  .kpi { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; }
+  .kpi { background:#f3ecdf; border:1px solid var(--line); border-radius:2px; padding:14px; }
   .kpi .v { font-size:24px; font-weight:700; } .kpi .l { color:var(--mute); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
   .two { grid-template-columns:1fr 1fr; } @media (max-width:900px){ .two{grid-template-columns:1fr;} }
-  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; min-width:0; }
-  .card h2 { font-size:15px; margin:0 0 10px; } .card p.hint { color:var(--mute); margin:-6px 0 10px; font-size:12px; }
+  .card { background:var(--panel); border:1px solid rgba(28,23,18,.16); border-radius:2px; padding:22px; min-width:0; box-shadow:0 16px 36px rgba(88,62,32,.05); }
+  .card h2 { font-family:var(--serif); font-size:22px; font-weight:560; letter-spacing:-.02em; margin:0 0 8px; } .card p.hint { color:var(--mute); margin:0 0 12px; font-size:14px; line-height:1.45; }
   table { width:100%; border-collapse:collapse; font-size:13px; } th,td { padding:6px 8px; border-bottom:1px solid var(--line); text-align:right; white-space:nowrap; }
   th:first-child, td:first-child { text-align:left; } th { color:var(--mute); font-weight:500; }
   .tbl { overflow-x:auto; }
   .pill { display:inline-block; padding:1px 8px; border-radius:99px; font-size:12px; font-weight:600; }
   .bad{background:#e5484d22;color:var(--bad)} .warn{background:#f2a33a22;color:var(--warn)} .good{background:#46c37b22;color:var(--good)}
   .kpi .v .pill { font-size:22px; padding:0 10px; }
-  .rec { border-left:3px solid var(--acc); padding:8px 12px; margin:8px 0; background:#0e1116; border-radius:0 8px 8px 0; }
-  .rec b { color:var(--acc); } .tag { font-size:11px; color:var(--mute); margin-left:6px; }
+  .rec { border-left:2px solid var(--rust); padding:8px 12px; margin:8px 0; background:#f3ecdf; border-radius:0; }
+  .rec b { color:var(--rust); } .tag { font-size:11px; color:var(--mute); margin-left:6px; }
   .vsm { display:flex; gap:4px; overflow-x:auto; padding-bottom:6px; }
-  .vsm .box { flex:1 0 92px; background:#0e1116; border:1px solid var(--line); border-radius:8px; padding:8px; font-size:12px; }
+  .vsm .box { flex:1 0 92px; background:#f3ecdf; border:1px solid var(--line); border-radius:2px; padding:8px; font-size:12px; }
   .vsm .box .n { font-weight:600; font-size:12px; margin-bottom:4px; } .bar { height:6px; border-radius:3px; background:var(--line); margin-top:4px; overflow:hidden; } .bar i { display:block; height:100%; }
   details { margin-top:16px; } summary { cursor:pointer; color:var(--mute); }
   .scen { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; margin-top:10px; }
   .scen label { display:flex; justify-content:space-between; gap:8px; align-items:center; color:var(--mute); font-size:13px; }
   .scen input { width:90px; }
   footer { color:var(--mute); font-size:12px; padding:24px; text-align:center; }
-  .drop { display:flex; align-items:center; justify-content:center; min-height:96px; border:1.5px dashed var(--line); border-radius:12px; color:var(--mute); cursor:pointer; text-align:center; padding:16px; transition:border-color .15s, background .15s; }
-  .drop:hover, .drop.over { border-color:var(--acc); background:#4fd1c50f; color:var(--ink); }
-  .drop:focus-within { outline:2px solid var(--acc); outline-offset:2px; }
+  .bench-head { max-width:40rem; margin-bottom:18px; }
+  .bench-head h2 { font-size:clamp(32px, 4vw, 52px); line-height:1.02; letter-spacing:-.03em; margin:0 0 10px; }
+  .bench-lead { margin:0; color:var(--mute); font-size:16px; max-width:62ch; }
+  .bench-grid { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(280px,.95fr); gap:22px; align-items:start; }
+  @media (max-width:860px) { .bench-grid { grid-template-columns:1fr; } }
+  .drop { display:flex; align-items:center; justify-content:center; min-height:168px; border:1.5px dashed #b7aa96; border-radius:2px; color:var(--mute); cursor:pointer; text-align:center; padding:22px; background:#f3ecdf; transition:border-color .15s, background .15s; }
+  .drop:hover, .drop.over { border-color:var(--rust); background:#f7f1e6; color:var(--ink); }
+  .drop:focus-within { outline:2px solid var(--rust); outline-offset:2px; }
+  .drop-copy { display:flex; flex-direction:column; gap:6px; }
+  .drop-copy strong { color:var(--ink); font-family:var(--serif); font-size:26px; font-weight:560; letter-spacing:-.02em; }
+  .drop-copy em { font-style:normal; font-size:14px; }
+  .cases-k { margin:14px 0 8px; color:var(--mute); font-size:13px; }
+  .case-row { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; }
+  @media (max-width:640px) { .case-row { grid-template-columns:1fr; } }
+  .case { display:flex; flex-direction:column; align-items:flex-start; gap:3px; text-align:left; padding:12px; border-radius:2px; background:#f3ecdf; min-height:96px; }
+  .case span { font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--rust); }
+  .case strong { font-size:15px; letter-spacing:-.01em; }
+  .case em { font-style:normal; color:var(--mute); font-size:12px; line-height:1.35; }
+  .case[aria-pressed="true"] { border-color:var(--rust); box-shadow:inset 0 0 0 1px var(--rust); background:#f7f1e6; }
+  .bench-ask { background:#f3ecdf; border:1px solid var(--line); border-radius:2px; padding:16px; }
+  .bench-empty { margin:14px 0 0; color:var(--mute); font-family:var(--serif); font-style:italic; font-size:18px; line-height:1.35; }
+  #photoCard:has(#photoResult:not(:empty)) .bench-empty { display:none; }
+  .photo-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:12px; }
+  .photo-actions .primary { padding:12px 18px; border-radius:10px; }
   .thumbs { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
-  .thumb { position:relative; width:96px; height:96px; border-radius:8px; overflow:hidden; border:1px solid var(--line); }
+  .thumb { position:relative; width:132px; height:132px; border-radius:12px; overflow:hidden; border:1px solid var(--line); }
   .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
   .thumb .n { position:absolute; left:4px; top:4px; background:#000a; color:#fff; font-size:11px; padding:1px 6px; border-radius:99px; }
   .thumb button { position:absolute; right:4px; top:4px; padding:0 7px; font-size:12px; line-height:20px; border-radius:99px; background:#000a; border:0; }
-  .photo-form { display:grid; grid-template-columns:1fr 2fr; gap:10px; margin-top:12px; }
+  .photo-form { display:grid; grid-template-columns:1fr; gap:10px; }
+  .bench-ask .photo-form { margin-top:0; }
   .photo-form label { display:flex; flex-direction:column; gap:4px; color:var(--mute); font-size:12px; min-width:0; }
   .photo-form input[type=text] { background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:8px 12px; font:inherit; }
   @media (max-width:640px){ .photo-form { grid-template-columns:1fr; } }
@@ -109,13 +136,16 @@
   .recnote { margin:10px 0 0; padding:8px 12px; border-radius:8px; background:#F2A33A14; border:1px solid #F2A33A44; color:#F5C27A; font-size:13px; }
   button.chip { padding:5px 10px; border-radius:99px; font-size:12px; }
   button.chip:hover, #takePhoto:hover { border-color:var(--acc); }
-  button:focus-visible { outline:2px solid var(--acc); outline-offset:2px; }
+  button:focus-visible, a:focus-visible { outline:2px solid var(--rust); outline-offset:2px; }
   .cam { margin-top:10px; display:flex; flex-direction:column; gap:8px; }
   .cam video { width:100%; max-width:560px; border-radius:10px; border:1px solid var(--line); background:#000; }
-  #phoneLink code { color:var(--acc); user-select:all; }
-  .verdict { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; }
-  .verdict .kpi .v { font-size:17px; } .verdict .kpi .d { color:var(--mute); font-size:12px; margin-top:4px; }
-  .conf { height:4px; border-radius:2px; background:var(--line); margin-top:8px; overflow:hidden; } .conf i { display:block; height:100%; background:var(--acc); }
+  #phoneLink code { color:var(--rust); user-select:all; }
+  .verdict { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-top:4px; }
+  .verdict .kpi { background:#f7f1e6; }
+  .verdict .kpi .v { font-family:var(--serif); font-size:22px; font-weight:560; letter-spacing:-.02em; text-transform:capitalize; line-height:1.15; }
+  .verdict .kpi:nth-child(5) { border-color:var(--rust); }
+  .verdict .kpi .d { color:var(--mute); font-size:12px; margin-top:4px; }
+  .conf { height:4px; border-radius:2px; background:var(--line); margin-top:8px; overflow:hidden; } .conf i { display:block; height:100%; background:var(--rust); }
 </style>
 </head>
 <body>
@@ -129,17 +159,18 @@
 
 <header class="hero" id="top">
   <div class="hero-in">
-    <p class="eyebrow">Apex Predator track · Drex vs. the Giants</p>
-    <h1>Find the waste.<br><span>Decide the fix.</span><br>In 0.3 seconds.</h1>
-    <p class="lead">Muda Lens puts a Lean Six Sigma black belt on every lot in a semiconductor line. Feed it line data or a photo. <b>Drex</b> decides which waste, where it started, which fix to run, and whether the lots ship.</p>
+    <p class="eyebrow">For the person who speaks first at standup</p>
+    <h1>Most of a chip’s life is spent waiting.</h1>
+    <p class="h1b">That is not the work.</p>
+    <p class="lead">Show it the line, or a photo from the floor. It names the waste, where it started, and whether the lots should ship. <b>Drex</b> does the reading. A person still makes the call.</p>
     <div class="cta">
-      <a class="btn primary" href="#photoCard">📷 Diagnose a photo</a>
+      <a class="btn primary" href="#photoCard">Diagnose a photo</a>
       <a class="btn" href="#proof">See the benchmark</a>
     </div>
     <div class="stats">
       <div class="stat"><span class="big">94.3%</span><span class="lbl">all 4 decisions right on 70 test cases<br><span class="mute">Claude Opus 5.5: 92.9% · rules: 67.1%</span></span></div>
       <div class="stat"><span class="big">8×</span><span class="lbl">faster than a frontier LLM<br><span class="mute">283 ms vs. 2,313 ms median</span></span></div>
-      <div class="stat"><span class="big amber">105×</span><span class="lbl">cheaper per decision<br><span class="mute">$0.16 vs. $17.18 per 1,000</span></span></div>
+      <div class="stat"><span class="big" style="color:var(--rust)">105×</span><span class="lbl">cheaper per decision<br><span class="mute">$0.16 vs. $17.18 per 1,000</span></span></div>
     </div>
   </div>
 </header>
@@ -199,49 +230,61 @@
     <div class="card"><h2>DMAIC action plan</h2><p class="hint">Auto-generated from the data — the starting point for the team's kaizen.</p><div id="recs"></div></div>
   </section>
 
-  <section class="card" style="margin-top:16px" id="photoCard">
-    <h2>📷 Photo diagnosis: show Drex what you see on the line</h2>
-    <p class="hint">Upload up to 8 photos: a die or wafer under the microscope, wire bonds, an SPC chart screenshot, a shelf of waiting lots, or the shop-floor layout. Drex Max reads the images and decides what they show, the defect type, the waste, the fix, and what to do with the lots.</p>
-    <label class="drop" id="drop" for="photos">
-      <input type="file" id="photos" accept="image/png,image/jpeg,image/webp" multiple hidden>
-      <span><b>Drop photos here</b> or click to choose · PNG, JPEG or WebP</span>
-    </label>
-    <div class="controls" style="margin-top:10px">
-      <button id="takePhoto">📸 Take a photo</button>
-      <input type="file" id="phoneCam" accept="image/*" capture="environment" hidden>
-      <span class="sub">or try a sample:</span>
-      <button class="chip" data-sample="scratch">Scratched die</button>
-      <button class="chip" data-sample="bond">Lifted wire bond</button>
-      <button class="chip" data-sample="wip">Overloaded WIP rack</button>
+  <section class="card bench" id="photoCard">
+    <div class="bench-head">
+      <p class="eyebrow">On the line</p>
+      <h2>Show Drex what you see.</h2>
+      <p class="bench-lead">A die under the scope, a wire bond, a chart, a rack of lots waiting. Drex reads up to eight photos and says what the waste is, which fix to run, and whether those lots should ship.</p>
     </div>
-    <div class="cam" id="cam" hidden>
-      <video id="camVideo" autoplay playsinline muted></video>
-      <div class="controls">
-        <button class="primary" id="snap">Capture</button>
-        <button id="camClose">Close camera</button>
-        <span class="sub" id="camMsg"></span>
+    <div class="bench-grid">
+      <div>
+        <label class="drop" id="drop" for="photos">
+          <input type="file" id="photos" accept="image/png,image/jpeg,image/webp" multiple hidden>
+          <span class="drop-copy"><strong>Drop the photo here</strong><em>or click to choose. PNG, JPEG, or WebP.</em></span>
+        </label>
+        <p class="cases-k">No camera on you? Open a case Drex has already read.</p>
+        <div class="case-row">
+          <button type="button" class="case" data-sample="scratch" aria-pressed="false"><span>Dicing</span><strong>Scratched die</strong><em>A bright arc across the die after saw.</em></button>
+          <button type="button" class="case" data-sample="bond" aria-pressed="false"><span>Wire bond</span><strong>Lifted bond</strong><em>One wire never lands on the pad.</em></button>
+          <button type="button" class="case" data-sample="wip" aria-pressed="false"><span>Probe</span><strong>Rack on hold</strong><em>Thirty-six lots waiting. Testers are down.</em></button>
+        </div>
+        <div class="controls" style="margin-top:12px">
+          <button id="takePhoto" type="button">Take a photo</button>
+          <input type="file" id="phoneCam" accept="image/*" capture="environment" hidden>
+        </div>
+        <div class="cam" id="cam" hidden>
+          <video id="camVideo" autoplay playsinline muted></video>
+          <div class="controls">
+            <button class="primary" id="snap" type="button">Capture</button>
+            <button id="camClose" type="button">Close camera</button>
+            <span class="sub" id="camMsg"></span>
+          </div>
+        </div>
+        <p class="sub" id="phoneLink" hidden></p>
+        <div class="thumbs" id="thumbs"></div>
+      </div>
+      <div class="bench-ask">
+        <div class="photo-form">
+          <label for="photoStep">Where on the line
+            <select id="photoStep"><option value="">Not specified</option></select>
+          </label>
+          <label for="photoNote">What should Drex know
+            <input type="text" id="photoNote" maxlength="500" placeholder="Seen on 3 lots after the bonder PM">
+          </label>
+        </div>
+        <div class="photo-actions">
+          <button class="primary" id="diagnosePhotos" type="button" disabled>Read the photo</button>
+          <button id="clearPhotos" type="button" disabled>Clear</button>
+          <span class="sub" id="photoStatus"></span>
+        </div>
+        <div id="photoResult"></div>
+        <p class="bench-empty">The call lands here. What it shows. The defect. The waste. The fix. And whether the lots ship.</p>
       </div>
     </div>
-    <p class="sub" id="phoneLink" hidden></p>
-    <div class="thumbs" id="thumbs"></div>
-    <div class="photo-form">
-      <label for="photoStep">Process step (optional)
-        <select id="photoStep"><option value="">Not specified</option></select>
-      </label>
-      <label for="photoNote">What should Drex know? (optional)
-        <input type="text" id="photoNote" maxlength="500" placeholder="e.g. Seen on 3 lots after the bonder PM on Tuesday">
-      </label>
-    </div>
-    <div class="controls" style="margin:10px 0">
-      <button class="primary" id="diagnosePhotos" disabled>Diagnose photos</button>
-      <button id="clearPhotos" disabled>Clear</button>
-      <span class="sub" id="photoStatus"></span>
-    </div>
-    <div id="photoResult"></div>
   </section>
 
   <section class="card" style="margin-top:16px" id="drexCard">
-    <h2>🦖 Drex decides: live call on this week's data</h2>
+    <h2>Drex decides, on this week’s data</h2>
     <p class="hint">Drex reads the line's data against its historical baseline and decides: which waste, which step, which countermeasure, and what to do with the lots. You can run the frontier LLM and rules on the same data for comparison.</p>
     <div class="controls" style="margin-bottom:10px">
       <button class="primary" id="askDrex">Ask Drex</button>
@@ -254,7 +297,7 @@
 
   <section class="card proof" style="margin-top:16px" id="proof">
     <p class="eyebrow">The proof</p>
-    <h2>🏁 Apex Predator arena: benchmark on ground-truth cases</h2>
+    <h2>The arena, on cases with a known answer</h2>
     <p class="hint">Each case has one known injected fault plus a decoy problem. A contender scores only if all 4 decisions are right. Run <code>npm run bench</code> to regenerate.</p>
     <div id="arena"><span class="sub">No results yet.</span></div>
   </section>
@@ -270,7 +313,8 @@
   </details>
 </main>
 <footer>
-  <p><b>Muda Lens</b> · built by Manjeet Singh &amp; Vani for the Apex Predator track · <a href="https://github.com/manjeetsingh-satveer/muda-lens" target="_blank" rel="noopener">github.com/manjeetsingh-satveer/muda-lens</a></p>
+  <p><b>Muda Lens</b> · Name the waste. Then the lots can move.</p>
+  <p>Built by Manjeet Singh &amp; Vani · <a href="https://github.com/manjeetsingh-satveer/muda-lens" target="_blank" rel="noopener">github.com/manjeetsingh-satveer/muda-lens</a></p>
   <p>All data is synthetic and modelled on a power-MOSFET line; no employer data is used. Bring your own via CSV with columns: <code id="cols"></code></p>
 </footer>
 

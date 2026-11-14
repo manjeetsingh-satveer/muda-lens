@@ -18,7 +18,7 @@
     return `<span class="pill ${cls}">${fmt(v)}</span>`;
   };
 
-  Chart.defaults.color = "#93a6a3"; Chart.defaults.borderColor = "#26363a"; Chart.defaults.font.family = "IBM Plex Sans, system-ui, sans-serif";
+  Chart.defaults.color = "#5c564c"; Chart.defaults.borderColor = "#d3c6b2"; Chart.defaults.font.family = "IBM Plex Sans, system-ui, sans-serif";
 
   function chart(id, cfg) { if (charts[id]) charts[id].destroy(); charts[id] = new Chart($(id), cfg); }
 
@@ -41,7 +41,7 @@
 
     chart("pareto", { data: { labels: res.pareto.map(p => p.name), datasets: [
       { type: "bar", label: "Cost", data: res.pareto.map(p => p.value), backgroundColor: res.pareto.map(p => F.WASTES[p.key].color), yAxisID: "y" },
-      { type: "line", label: "Cumulative %", data: res.pareto.map(p => p.cum * 100), borderColor: "#e8edeb", pointRadius: 3, yAxisID: "y1" } ] },
+      { type: "line", label: "Cumulative %", data: res.pareto.map(p => p.cum * 100), borderColor: "#1c1712", pointRadius: 3, yAxisID: "y1" } ] },
       options: { plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: money } }, y1: { position: "right", min: 0, max: 100, grid: { display: false }, ticks: { callback: v => v + "%" } } } } });
 
     chart("stack", { type: "bar", data: { labels: res.steps.map(s => s.id), datasets: Object.entries(F.WASTES).map(([key, w]) => ({ label: w.name, data: res.steps.map(s => s.waste[key]), backgroundColor: w.color })) },
@@ -139,6 +139,7 @@
   let currentSample = null, liveAvailable = false;
   async function addFiles(files) {
     currentSample = null;
+    document.querySelectorAll("[data-sample]").forEach(b => b.setAttribute("aria-pressed", "false"));
     const ok = [...files].filter(f => /^image\/(png|jpeg|webp)$/.test(f.type));
     if (ok.length < files.length) $("photoStatus").textContent = "Skipped files that aren't PNG, JPEG or WebP.";
     for (const f of ok.slice(0, MAX_PHOTOS - photos.length)) {
@@ -212,6 +213,7 @@
     await addFiles([new File([blob], `sample-${b.dataset.sample}.png`, { type: "image/png" })]);
     $("photoStep").value = s.step; $("photoNote").value = s.note;
     currentSample = b.dataset.sample; // set after addFiles, which clears it
+    b.setAttribute("aria-pressed", "true");
     if (!liveAvailable) $("photoStatus").textContent = RECORDED.photo?.[currentSample] ? "Sample loaded. Click Diagnose to replay Drex’s recorded answer." : "";
   });
 
