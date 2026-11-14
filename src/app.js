@@ -100,12 +100,31 @@
       $("drexStatus").textContent = /fetch|Failed|Server returned (404|405|501)/.test(e.message) ? "This public page can’t call Drex live. Live calls run on the team laptop." : e.message;
     }
   }
+  // Drex's call on the week's line data: a plain-English headline, then the contenders side by side.
+  const stepName = id => F.STEPS.find(s => s.id === id)?.name || id;
+  const cellSay = (q, v) => q === "culprit_step" ? stepName(v) : say(v);
+  function decideHeadline(d) {
+    if (!d || d.error || !d.answers) return "";
+    const a = d.answers, c = d.confidence || {};
+    const sure = Math.min(c.root_waste ?? 1, c.culprit_step ?? 1);
+    if (sure < 0.5) {
+      return `<div class="call-card good"><div class="call-top"><span class="call-k">Drex’s call</span></div>
+        <p class="call-h">Nothing clearly wrong this week.</p>
+        <p class="call-s">Drex’s best guess, ${esc(say(a.root_waste).toLowerCase())} at ${esc(stepName(a.culprit_step))}, is only ${pct(sure)} sure. That’s noise, not a finding, so nobody gets pulled off the line.</p></div>`;
+    }
+    const act = { release: "Let the lots ship.", hold: "Hold the lots for review.", rework: "Rework the lots." }[a.disposition] || "";
+    const bad = a.root_waste === "defects" || a.disposition !== "release";
+    return `<div class="call-card ${bad ? "bad" : "good"}"><div class="call-top"><span class="call-k">Drex’s call</span><span class="sev ${bad ? "sev-high" : "sev-medium"}">${pct(sure)} sure</span></div>
+      <p class="call-h">${esc(say(a.root_waste))} at ${esc(stepName(a.culprit_step))}.</p>
+      <p class="call-s">${esc(act)} Run ${esc(say(a.countermeasure))}.</p></div>`;
+  }
   function renderDecide(out, note = "") {
-      $("decide").innerHTML = `<tr><th>Contender</th>${Q.map(q => `<th>${q.replace("_", " ")}</th>`).join("")}<th>Latency</th><th>Cost</th></tr>` +
+      $("decideHead").innerHTML = decideHeadline(out.drex);
+      $("decide").innerHTML = `<tr><th>Contender</th><th>Waste</th><th>Where</th><th>Fix</th><th>Lots</th><th>Time</th><th>Cost</th></tr>` +
         Object.values(out).map(o => o.error ? `<tr><td>${esc(o.label)}</td><td colspan="6" style="text-align:left;color:var(--warn)">${esc(o.error)}</td></tr>` :
-          `<tr><td>${esc(o.label)}</td>${Q.map(q => `<td>${esc(o.answers[q])}${o.confidence?.[q] != null ? ` <span class="sub">${(o.confidence[q] * 100).toFixed(0)}%</span>` : ""}</td>`).join("")}
-           <td>${o.latencyMs} ms</td><td>$${o.costUsd.toFixed(6)}</td></tr>` +
-          (o.confidence && Math.min(...Q.map(q => o.confidence[q] ?? 1)) < 0.5 ? `<tr><td colspan="7" style="text-align:left;color:var(--warn)">⚠ Low confidence on at least one decision: route to an engineer for review.</td></tr>` : "")).join("");
+          `<tr><td>${esc(o.label)}</td>${Q.map(q => { const c = o.confidence?.[q];
+              return `<td>${esc(cellSay(q, o.answers[q]))}${c != null ? ` <span class="fp${c < 0.5 ? " low" : ""}">${pct(c)}</span>` : ""}</td>`; }).join("")}
+           <td>${o.latencyMs.toLocaleString()} ms</td><td>$${o.costUsd.toFixed(5)}</td></tr>`).join("");
       $("decideNote").innerHTML = note;
   }
   $("askDrex").onclick = () => decide(["drex"]);
