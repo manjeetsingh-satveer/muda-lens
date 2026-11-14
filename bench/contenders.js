@@ -28,7 +28,12 @@ async function drexCall({ state, questions, images }) {
     headers: { "Content-Type": "application/json", "X-Nace-Client": "muda-lens/1", ...(c.key ? { Authorization: `Bearer ${c.key}` } : {}) },
     body: JSON.stringify({ model: c.model, state, questions, ...(images?.length ? { images } : {}) }),
   });
-  if (!res.ok) throw new Error(`Drex HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  if (!res.ok) {
+    const text = await res.text();
+    if (/Security Checkpoint|<!DOCTYPE/i.test(text))
+      throw new Error(`Drex HTTP ${res.status}: the Drex API's firewall is blocking this network right now. Try another connection (e.g. a phone hotspot) or wait a few minutes.`);
+    throw new Error(`Drex HTTP ${res.status}: ${text.slice(0, 300)}`);
+  }
   return res.json();
 }
 

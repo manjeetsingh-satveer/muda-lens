@@ -74,23 +74,39 @@
   // ---------- Drex live decisions (needs `npm start`, which proxies the API) ----------
   const Q = ["root_waste", "culprit_step", "countermeasure", "disposition"];
   const esc = s => String(s ?? "—").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  // Recorded real Drex runs (bench/recorded.json). Replayed, clearly labelled, only when the live
+  // API can't be reached: on the public site, or if the venue network blocks the API mid-demo.
+  let RECORDED = {};
+  fetch("bench/recorded.json").then(r => r.ok ? r.json() : {}).then(j => { RECORDED = j || {}; }).catch(() => {});
+  const recNote = when => `<p class="recnote">▶ Replaying a recorded live Drex run from ${esc(new Date(when).toLocaleString())}. The live API isn’t reachable from here right now.</p>`;
+  const liveFailed = e => /fetch|Failed|NetworkError|HTTP 4|HTTP 5|403|429|5\d\d|not configured|Server returned/i.test(e.message);
+
   async function decide(contenders) {
     $("drexStatus").textContent = "Deciding…";
     try {
       const r = await fetch("api/decide", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rows, contenders }) });
       if (!r.ok) throw new Error("Server returned " + r.status + ". Start it with `npm start`.");
       const out = await r.json();
+      if (out.drex?.error && !out.claude?.answers) throw new Error(out.drex.error);
+      renderDecide(out);
+      $("drexStatus").textContent = "";
+    } catch (e) {
+      const rec = RECORDED.line?.[$("scenario").value];
+      if (rec && liveFailed(e)) { renderDecide(rec.result, recNote(rec.at)); $("drexStatus").textContent = ""; return; }
+      $("drexStatus").textContent = e.message.includes("fetch") ? "Live calls need the server: run `npm start`." : e.message;
+    }
+  }
+  function renderDecide(out, note = "") {
       $("decide").innerHTML = `<tr><th>Contender</th>${Q.map(q => `<th>${q.replace("_", " ")}</th>`).join("")}<th>Latency</th><th>Cost</th></tr>` +
         Object.values(out).map(o => o.error ? `<tr><td>${esc(o.label)}</td><td colspan="6" style="text-align:left;color:var(--warn)">${esc(o.error)}</td></tr>` :
           `<tr><td>${esc(o.label)}</td>${Q.map(q => `<td>${esc(o.answers[q])}${o.confidence?.[q] != null ? ` <span class="sub">${(o.confidence[q] * 100).toFixed(0)}%</span>` : ""}</td>`).join("")}
            <td>${o.latencyMs} ms</td><td>$${o.costUsd.toFixed(6)}</td></tr>` +
           (o.confidence && Math.min(...Q.map(q => o.confidence[q] ?? 1)) < 0.5 ? `<tr><td colspan="7" style="text-align:left;color:var(--warn)">⚠ Low confidence on at least one decision: route to an engineer for review.</td></tr>` : "")).join("");
-      $("drexStatus").textContent = "";
-    } catch (e) { $("drexStatus").textContent = e.message.includes("fetch") ? "Live calls need the server: run `npm start`." : e.message; }
+      $("decideNote").innerHTML = note;
   }
   $("askDrex").onclick = () => decide(["drex"]);
   $("askAll").onclick = () => decide(["drex", "claude", "rules"]);
-  fetch("api/status").then(r => r.json()).then(s => { $("drexStatus").textContent = s.drex ? `Connected: ${s.drex}` : "Drex not configured: set DREX_BASE_URL in .env"; }).catch(() => { const m = "Hosted demo: live Drex calls and photo diagnosis run on the team laptop (npm start). The arena below shows real Drex and Claude runs."; $("drexStatus").textContent = m; $("photoStatus").textContent = m; });
+  fetch("api/status").then(r => r.json()).then(s => { liveAvailable = !!s.drex; $("drexStatus").textContent = s.drex ? `Connected: ${s.drex}` : "Drex not configured: set DREX_BASE_URL in .env"; }).catch(() => { $("drexStatus").textContent = "Public demo: Ask Drex replays recorded live runs for each scenario."; $("photoStatus").textContent = "Public demo: pick a sample below to see Drex’s recorded answer. Your own photos need the team laptop."; });
 
   // ---------- Photo diagnosis (Drex Max reads images) ----------
   const photos = []; // { name, dataUrl }
@@ -116,7 +132,9 @@
     const total = photos.reduce((a, p) => a + p.dataUrl.length, 0);
     $("photoStatus").textContent = photos.length ? `${photos.length} photo${photos.length > 1 ? "s" : ""} ready · ${(total / 1e6).toFixed(1)} MB` : "";
   }
+  let currentSample = null, liveAvailable = false;
   async function addFiles(files) {
+    currentSample = null;
     const ok = [...files].filter(f => /^image\/(png|jpeg|webp)$/.test(f.type));
     if (ok.length < files.length) $("photoStatus").textContent = "Skipped files that aren't PNG, JPEG or WebP.";
     for (const f of ok.slice(0, MAX_PHOTOS - photos.length)) {
@@ -189,6 +207,8 @@
     photos.length = 0; $("photoResult").innerHTML = "";
     await addFiles([new File([blob], `sample-${b.dataset.sample}.png`, { type: "image/png" })]);
     $("photoStep").value = s.step; $("photoNote").value = s.note;
+    currentSample = b.dataset.sample; // set after addFiles, which clears it
+    if (!liveAvailable) $("photoStatus").textContent = RECORDED.photo?.[currentSample] ? "Sample loaded. Click Diagnose to replay Drex’s recorded answer." : "";
   });
 
   // --- Phone link: open the same page on a phone on this Wi-Fi to snap photos ---
@@ -205,6 +225,15 @@
         body: JSON.stringify({ images: photos.map(p => p.dataUrl), step: $("photoStep").value, note: $("photoNote").value }) });
       const o = await r.json().catch(() => ({ error: "Server returned " + r.status }));
       if (!r.ok || o.error) throw new Error(o.error || "Server returned " + r.status);
+      renderPhoto(o);
+      $("photoStatus").textContent = "";
+    } catch (e) {
+      const rec = currentSample && RECORDED.photo?.[currentSample];
+      if (rec && liveFailed(e)) { renderPhoto(rec.result, recNote(rec.at)); $("photoStatus").textContent = ""; }
+      else $("photoStatus").textContent = /fetch|Failed/.test(e.message) ? "Live photo diagnosis runs on the team laptop (npm start). Try one of the samples to see a recorded Drex run." : e.message;
+    } finally { $("diagnosePhotos").disabled = !photos.length; }
+  };
+  function renderPhoto(o, note = "") {
       const card = (label, key, extra = "") => {
         const c = o.confidence[key], v = o.answers[key], desc = o.labels[key]?.[v];
         return `<div class="kpi"><div class="l">${label}</div><div class="v">${esc(NICE(v))}</div>${desc ? `<div class="d">${esc(desc)}</div>` : ""}${extra}
@@ -215,12 +244,8 @@
           ${card("What it shows", "subject")}${card("Defect type", "defect_type")}${card("Lean waste", "root_waste")}
           ${card("Countermeasure", "countermeasure")}${card("Lots", "disposition")}${card("Severity", "severity")}</div>
         <p class="sub" style="margin-top:10px">${esc(o.model)} · ${o.latencyMs} ms · ${o.inputTokens} tokens · $${o.costUsd.toFixed(6)}</p>
-        ${low ? `<p style="color:var(--warn)">⚠ Drex is unsure about at least one answer. Send these photos to an engineer for review.</p>` : ""}`;
-      $("photoStatus").textContent = "";
-    } catch (e) {
-      $("photoStatus").textContent = /fetch|Failed/.test(e.message) ? "Photo diagnosis runs on the team server: run npm start." : e.message;
-    } finally { $("diagnosePhotos").disabled = !photos.length; }
-  };
+        ${low ? `<p style="color:var(--warn)">⚠ Drex is unsure about at least one answer. Send these photos to an engineer for review.</p>` : ""}${note}`;
+  }
 
   // ---------- Arena (benchmark results) ----------
   fetch("bench/results.json").then(r => r.ok ? r.json() : null).then(res => {
